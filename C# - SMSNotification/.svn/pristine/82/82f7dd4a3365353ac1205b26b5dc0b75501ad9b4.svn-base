@@ -1,0 +1,144 @@
+﻿using Kedica.Areas.Reports.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web.Mvc;
+
+namespace Kedica.Areas.Reports.Controllers
+{
+    public class RealTimeReportViewingController : Controller
+    {
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+        // GET: Reports/RealTimeReportViewing
+
+        [AllowAnonymous]
+        public ActionResult Index()
+        {
+            return View("RealTimeReportViewing");
+        }
+        [AllowAnonymous]
+        public ActionResult GetRealTimeViewingResult()
+        {
+            List<RealTimeData> data = new List<RealTimeData>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            string MixerName = Request["MixerName"].ToString();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "RealTimeReportViewing";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_MixerName", MixerName);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new RealTimeData
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    NoData = Convert.ToInt32(sdr["NoData"]),
+                                    GridData = sdr["GridData"].ToString(),
+                                    ElecGridData = sdr["ElecGridData"].ToString(),
+                                    TempElecGridData = sdr["TempElecGridData"].ToString(),
+                                    MaxTemp = Convert.ToDecimal(sdr["MaxTemp"]),
+                                    MaxWater = Convert.ToDecimal(sdr["MaxWater"]),
+                                    Temp = Convert.ToDecimal(sdr["Temp"]),
+                                    Elec = Convert.ToDecimal(sdr["Elec"]),
+                                    Water = Convert.ToDecimal(sdr["Water"]),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.NoData.ToString().Contains(searchValue.ToLower()) ||
+                    x.GridData.ToString().Contains(searchValue.ToLower()) ||
+                    x.Temp.ToString().Contains(searchValue.ToLower())
+                ).ToList<RealTimeData>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<RealTimeData>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        [AllowAnonymous]
+        public ActionResult GetMachineListDataList()
+        {
+            List<SelectListItem> MachineDataList = new List<SelectListItem>();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdSql = conn.CreateCommand())
+                    {
+                        cmdSql.CommandType = CommandType.Text;
+                        cmdSql.CommandText = "Machine_GetMachineName";
+                        using (MySqlDataReader sdr = cmdSql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                MachineDataList.Add(new SelectListItem
+                                {
+                                    Text = sdr["MachineName"].ToString(),
+                                    Value = sdr["MachineName"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { MachineDataList = MachineDataList } }, JsonRequestBehavior.AllowGet);
+        }
+    }
+}

@@ -1,0 +1,25 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/Home-CSS")
+}
+@*<div class="panel panel-inverse">
+        <div class="panel-heading">
+            <div class="panel-heading-btn">
+                <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+            </div>
+            <h4 class="panel-title"><span class="fa fa-th-large"></span> @ViewBag.Title</h4>
+        </div>
+        <div class="panel-body">
+
+        </div>
+    </div>*@
+<div class="m-b-10 m-t-10 f-s-15">
+    <i class="fa fa-th-large"></i> <span>Dashboards</span>
+</div>
+@section scripts{
+    @Scripts.Render("~/Home-JS")
+}

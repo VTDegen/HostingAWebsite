@@ -1,0 +1,440 @@
+﻿
+@{
+    ViewBag.Title = "Report Generation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section css{
+    @Styles.Render("~/ReportGeneration-CSS")
+}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <form data-parsley-validate id="frmSendTransaction">
+            <br />
+            <div class="row">
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="FirstName">Date From </label>
+                        </div>
+                        <input type="text" id="SrchDateFrom" tabindex="3" name="SrchDateFrom" class="form-control input" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="FirstName">Date To </label>
+                        </div>
+                        <input type="text" id="SrchDateTo" tabindex="3" name="SrchDateTo" class="form-control input"  autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-sm-5">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="FirstName">First Name </label>
+                        </div>
+                        <input type="text" id="SrchFirstName" tabindex="3" name="SrchFirstName" class="form-control input" data-parsley-maxlength="255" data-parsley-errors-container="#err-FirstName" autocomplete="off">
+                    </div>
+
+                </div>
+                <div class="col-sm-4">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="LastName">Last Name </label>
+                        </div>
+                        <input type="text" id="SrchLastName" tabindex="4" name="SrchLastName" class="form-control input" data-parsley-maxlength="255" data-parsley-errors-container="#err-LastName" autocomplete="off">
+                    </div>
+
+                </div>
+                <div class="col-sm-3">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="MiddleName">Middle Name </label>
+                        </div>
+                        <input type="text" id="SrchMiddleName" tabindex="5" name="SrchMiddleName" class="form-control input" data-parsley-maxlength="255" data-parsley-errors-container="#err-MiddleName" autocomplete="off">
+                    </div>
+
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-sm-5">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="ContactNumber">Contact Number</label>
+                        </div>
+                        <input type="text" id="SrchContactNumber" tabindex="6" name="SrchContactNumber" class="form-control input" data-parsley-maxlength="100" data-parsley-errors-container="#err-ContactNumber" autocomplete="off">
+                    </div>
+
+
+                </div>
+                <div class="col-sm-7">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="Email">Email Address </label>
+                        </div>
+                        <input type="text" id="SrchEmail" name="SrchEmail" tabindex="7" class="form-control input" data-parsley-maxlength="100" data-parsley-errors-container="#err-Email" autocomplete="off">
+                    </div>
+
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-sm-5">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="Gender">Gender</label>
+                        </div>
+                        <select id="SrchGender" name="SrchGender" tabindex="8" class="form-control input onChangeParsley" data-parsley-errors-container="#err-Gender"></select>
+                    </div>
+
+
+                </div>
+                <div class="col-sm-7">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="CivilStatus">Civil Status </label>
+                        </div>
+                        <select id="SrchCivilStatus" name="SrchCivilStatus" tabindex="9" class="form-control input onChangeParsley" data-parsley-errors-container="#err-CivilStatus"></select>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-sm-12">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:138px;" for="Role">Role </label>
+                        </div>
+                        <select id="SrchRole" name="SrchRole" class="form-control input" tabindex="10" data-parsley-errors-container="#err-Role" autocomplete="off">
+                            <option value="">--Please Select Role--</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="HeadAdministrator">Head Administrator</option>
+                            <option value="Faculty">Faculty</option>
+                            <option value="NonFaculty">Non - Faculty Staff</option>
+                            <option value="Student">Student</option>
+                        </select>
+                    </div>
+                    <div id="err-Role"></div>
+                </div>
+
+            </div>
+            <hr />
+            <div id="SrchStudentOtherInformation" class="fold" hidden>
+                <div class="row ">
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="StuDepartment">Department<span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchStuDepartment" name="SrchStuDepartment" class="form-control input onChangeParsley" data-parsley-errors-container="#err-StuDepartment"></select>
+                        </div>
+
+
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="StuCourse">Course <span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchStuCourse" name="SrchStuCourse" class="form-control input onChangeParsley" data-parsley-errors-container="#err-StuCourse"></select>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="StuSection">Section <span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchStuSection" name="SrchStuSection" class="form-control input onChangeParsley" data-parsley-errors-container="#err-StuSection"></select>
+                        </div>
+                        <div id="err-StuSection"></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="StuYearLevel">Year Level<span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchStuYearLevel" name="SrchStuYearLevel" class="form-control input onChangeParsley" data-parsley-errors-container="#err-StuYearLevel"></select>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label class="form-check-label" for="Scholarship">Scholarship</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-check-label" for="SocialStatus">Social Status</label>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-sm-3">
+                        <div class="form-check">
+                            <input class="form-check-input SrchchckStudentData input" type="checkbox" id="SrchTES" name="TES" />
+                            <label class="form-check-label" for="TES">TES Recipient</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-check">
+                            <input class="form-check-input SrchchckStudentData input" type="checkbox" id="SrchTDP" name="TDP" />
+                            <label class="form-check-label" for="TDP">TDP Recipient</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <input class="form-check-input SrchchckStudentData input" type="checkbox" id="SrchPersonDisability" name="PersonDisability" />
+                            <label class="form-check-label" for="PersonDisability">Person with Disability</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <input class="form-check-input SrchchckStudentData input" type="checkbox" id="SrchWorkingStudent" name="WorkingStudent" />
+                            <label class="form-check-label" for="WorkingStudent">Working Student</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <input class="form-check-input SrchchckStudentData input" type="checkbox" id="SrchNotApplicable" name="NotApplicable" />
+                            <label class="form-check-label" for="NotApplicable">Not Applicable</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-sm-12">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="Organization">Organization <span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchOrganization" name="Organization" class="form-control input onChangeParsley" data-parsley-errors-container="#err-Organization">
+                                <option value="">--Please Select--</option>
+                                <option value="1">True</option>
+                                <option value="0">False</option>
+
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+                <hr />
+                <div id="SrchStudentOrganization" hidden>
+                    <div class="row ">
+                        <h5 style="margin-left:10px !important;">Organization List</h5>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchALLS" name="SrchALLS" />
+                                <label class="form-check-label" for="ALLS">ALLS</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchAPL" name="SrchAPL" />
+                                <label class="form-check-label" for="APL">APL</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchASGRD" name="SrchASGRD" />
+                                <label class="form-check-label" for="ASGRD">ASGRD</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchCAITO" name="SrchCAITO" />
+                                <label class="form-check-label" for="CAITO">CAITO</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchCAPS" name="SrchCAPS" />
+                                <label class="form-check-label" for="CAPS">CAPS</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchCSS" name="SrchCSS" />
+                                <label class="form-check-label" for="CSS">CSS</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchDCP" name="SrchDCP" />
+                                <label class="form-check-label" for="DCP">DCP</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchENC" name="SrchENC" />
+                                <label class="form-check-label" for="ENC">ENC</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchEXCEL" name="SrchEXCEL" />
+                                <label class="form-check-label" for="EXCEL">EXCEL</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchFELTA" name="SrchFELTA" />
+                                <label class="form-check-label" for="FELTA">FELTA</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchIFIGHT" name="SrchIFIGHT" />
+                                <label class="form-check-label" for="IFIGHT">IFIGHT</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchITS" name="SrchITS" />
+                                <label class="form-check-label" for="ITS">ITS</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchJPIA" name="SrchJPIA" />
+                                <label class="form-check-label" for="JPIA">JPIA</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchLAGABATA" name="SrchLAGABATA" />
+                                <label class="form-check-label" for="LAGABATA">LAGABATA</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchLEAD" name="SrchLEAD" />
+                                <label class="form-check-label" for="LEAD">LEAD</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchMDAS" name="SrchMDAS" />
+                                <label class="form-check-label" for="MDAS">MDAS</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchMSS" name="SrchMSS" />
+                                <label class="form-check-label" for="MSS">MSS</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchROTARACT" name="SrchROTARACT" />
+                                <label class="form-check-label" for="ROTARACT">ROTARACT</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchSAVE" name="SrchSAVE" />
+                                <label class="form-check-label" for="SAVE">SAVE</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchSFJ" name="SrchSFJ" />
+                                <label class="form-check-label" for="SFJ">SFJ</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchSOCIOS" name="SrchSOCIOS" />
+                                <label class="form-check-label" for="SOCIOS">SOCIOS</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchPROTEGE" name="SrchPROTEGE" />
+                                <label class="form-check-label" for="PROTEGE">PROTEGE</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-check">
+                                <input class="form-check-input SrchorgClass SrchchckStudentData input" type="checkbox" id="SrchUM3P" name="SrchUM3P" />
+                                <label class="form-check-label" for="UM3P">UM3P</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div id="SrchFacultyOtherInformation" class="fold" hidden>
+                <div class="row ">
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="FacDepartment">Department<span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchFacDepartment" name="SrchFacDepartment" class="form-control input onChangeParsley" data-parsley-errors-container="#err-FacDepartment"></select>
+                        </div>
+
+
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="FacPosition">Position <span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchFacPosition" name="SrchFacPosition" class="form-control input onChangeParsley" data-parsley-errors-container="#err-FacPosition"></select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div id="SrchNonFacultyOtherInformation" class="fold" hidden>
+                <div class="row ">
+                    <div class="col-sm-12">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:138px;" for="NonFacPosition">Position <span class="text-danger"></span></label>
+                            </div>
+                            <select id="SrchNonFacPosition" name="SrchNonFacPosition" class="form-control input onChangeParsley" data-parsley-errors-container="#err-SrchNonFacPosition"></select>
+                        </div>
+                        <div id="err-SrchNonFacPosition"></div>
+                    </div>
+                </div>
+            </div>
+
+            <br />
+        </form>
+        <div class="row ">
+            <div class="col-sm-3 offset-9">
+                <button type="button" id="btnDownload" class="btn btn-sm btn-primary btn-block"><span class="fa fa-paper-plane"></span><span class="btnLabel"> Download Report</span></button>
+            </div>
+        </div>
+        <br />
+        <div class="hljs-wrapper">
+            <table id="tblAnnouncementList" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    @Scripts.Render("~/ReportGeneration-JS")
+}
+
+

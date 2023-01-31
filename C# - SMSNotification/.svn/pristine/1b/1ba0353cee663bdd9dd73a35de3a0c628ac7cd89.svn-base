@@ -1,0 +1,290 @@
+﻿
+@{
+    ViewBag.Title = "Daily Target VS Actual";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/DailyTargetVsActual-CSS")
+    <style>
+
+
+
+
+
+
+
+        .select2-selection__rendered {
+            line-height: 31px !important;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 32px !important;
+        }
+
+        .select2-selection__arrow {
+            height: 34px !important;
+        }
+
+        ul.select2-results {
+            max-height: 200px;
+        }
+
+        .select2-selection--multiple {
+            overflow-y: auto;
+        }
+
+        .select2-selection--multiple {
+            height: 300px !important;
+        }
+    </style>}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="nav nav-tabs">
+                    <li class="nav-items">
+                        <a href="#MachineTargetTab" data-toggle="tab" class="nav-link active" id="MachineTargetTabValid">
+                            <span class="d-sm-none">Tab 1</span>
+                            <span class="d-sm-block d-none">Machine Target</span>
+                        </a>
+                    </li>
+                    <li class="nav-items">
+                        <a href="#DailyFilterTab" data-toggle="tab" class="nav-link" id="DailyFilterTabValid">
+                            <span class="d-sm-none">Tab 2</span>
+                            <span class="d-sm-block d-none">Target VS Actual (Daily)</span>
+                        </a>
+                    </li>
+                    <li class="nav-items">
+                        <a href="#WeeklyFilterTab" data-toggle="tab" class="nav-link" id="WeeklyFilterTabValid">
+                            <span class="d-sm-none">Tab 3</span>
+                            <span class="d-sm-block d-none">Target VS Actual (Weekly)</span>
+                        </a>
+                    </li>
+                    <li class="nav-items">
+                        <a href="#MonthlyFilterTab" data-toggle="tab" class="nav-link" id="MonthlyFilterTabValid">
+                            <span class="d-sm-none">Tab 4</span>
+                            <span class="d-sm-block d-none">Target VS Actual (Monthly)</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active show" id="MachineTargetTab">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="row">
+                                    <div class="col-sm-6 m-b-5 ReadAndWrite">
+                                        <button type="button" id="btnAddMachineTarget" class="btn btn-sm btn-primary btn-block"><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                                    </div>
+                                    <div class="col-sm-6 m-b-5 ReadAndWrite">
+                                        <button type="button" id="btnDeleteMachineTarget" class="btn btn-sm btn-danger btn-block tbl-tr-btns" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="DailyFilterTab">
+                        <div class="row">
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="WeeklyFilterTab">
+                        <div class="row">
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="MonthlyFilterTab">
+                        <div class="row">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form data-parsley-validate id="frmFilterDailyTarget">
+            <div class="row " id="DateFilter">
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterFromDate">Date From<span class="text-danger"></span></label>
+                        </div>
+                        <input type="text" id="FilterFromDate" name="FilterFromDate" class="form-control input" data-parsley-maxlength="50" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterToDate">Date To<span class="text-danger"></span></label>
+                        </div>
+                        <input type="text" id="FilterToDate" name="FilterToDate" class="form-control input" data-parsley-maxlength="50" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-sm-12">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterMachineID">Machine ID <span class="text-danger"></span></label>
+                        </div>
+                        <select class="form-control input form-control-sm custom-select" id="FilterMachineID" name="FilterMachineID"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="row">
+                                <div class="col-sm-6 m-b-5">
+                                    <button type="button" id="btnExportDetails" class="btn btn-sm btn-info btn-block" disabled><span class="fa fa-file-excel-o"></span><span class="btnLabel"> Generate Excel</span></button>
+                                </div>
+                                <div class="col-sm-6 m-b-5" id="WeeklyBtnSetting" hidden>
+                                    <button type="button" id="btnSetWeeklySetting" class="btn btn-sm btn-info btn-block "><span class="fa fa-clock"></span><span class="btnLabel"> Weekly Setting</span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="row">
+                                <div class="col-sm-6 m-b-5">
+                                    <button type="submit" id="btnFilterDailyTarget" class="btn btn-sm btn-primary btn-block "><span class="fa fa-glass-martini"></span><span class="btnLabel"> Filter</span></button>
+                                </div>
+                                <div class="col-sm-6 m-b-5">
+                                    <button type="button" id="btnCancelDataDailyTarget" class="btn btn-sm btn-warning btn-block "><span class="fa fa-times-circle"></span><span class="btnLabel"> Clear</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="hljs-wrapper" id="tbldata">
+            <table id="tblDailyTarget" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+        <div id="DailyTargetData"></div>
+    </div>
+</div>
+<div class="modal fade " id="mdlSetupWeeklySetting" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlWeeklySettingTitle"> Setup Weekly Setting</h4>
+                <button type="button" class="close" data-dismiss="modal" id="btnCloseWeeklySetting" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form data-parsley-validate id="frmWeeklySetting">
+                    <div class="row ">
+                        <div class="col-sm-12">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:92px;" for="GroupCount">Group Count <span class="text-danger"></span></label>
+                                </div>
+                                <input type="text" id="GroupCount" name="GroupCount" class="form-control NewGroupCount input" value="1" readonly data-parsley-maxlength="50" autocomplete="off" data-parsley-errors-container="#err-GroupCount">
+                            </div>
+                            <div id="err-GroupCount"></div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:92px;" for="WeeklySettingFrom">Date From <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="WeeklySettingFrom" name="WeeklySettingFrom" class="form-control WeeklySettingFrom input NewWeeklySettingFrom" data-parsley-maxlength="50" required autocomplete="off" data-parsley-errors-container="#err-WeeklySettingFrom">
+                            </div>
+                            <div id="err-WeeklySettingFrom"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:92px;" for="WeeklySettingTo">Date To <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="WeeklySettingTo" name="WeeklySettingTo" class="form-control WeeklySettingTo input NewWeeklySettingTo" data-parsley-maxlength="50" required autocomplete="off" data-parsley-errors-container="#err-WeeklySettingTo">
+                            </div>
+                            <div id="err-WeeklySettingTo"></div>
+                        </div>
+                    </div>
+                    <div id="WeeklySettingListContainer"></div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button type="button" id="btnAddWeeklySetting" class="btn btn-sm btn-primary btn-block"><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveWeeklySetting"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelWeeklySetting"><span class="fa fa-times"></span> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlDailyTarget" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlDailyTargetTitle"> Create Machine Target </h4>
+                <button type="button" class="close" id="btnUpClosedMdl" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmDailyTarget">
+                <div class="modal-body">
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="MachineDataList">Machine ID<span class="text-danger">*</span></label>
+                                </div>
+                                <select class="form-control select2" multiple="multiple" id="MachineDataList" data-parsley-errors-container="#err-MachineDataList"></select>
+                            </div>
+                            <div id="err-MachineDataList"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="TargetQty">Target QTY<span class="text-danger">*</span></label>
+                                </div>
+                                <input type="number" id="TargetQty" name="TargetQty" class="form-control input" required data-parsley-maxlength="50" data-parsley-errors-container="#err-TargetQty" autocomplete="off">
+                            </div>
+                            <div id="err-TargetQty"></div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="DateTargetFrom">Date From<span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="DateTargetFrom" name="DateTargetFrom" class="form-control input" required data-parsley-maxlength="50" data-parsley-errors-container="#err-DateTargetFrom" autocomplete="off">
+                            </div>
+                            <div id="err-DateTargetFrom"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="DateTargetTo">Date To<span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="DateTargetTo" name="DateTargetTo" class="form-control input" required data-parsley-maxlength="50" data-parsley-errors-container="#err-DateTargetTo" autocomplete="off">
+                            </div>
+                            <div id="err-DateTargetTo"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" id="DailyTargetID" class="input" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveDailyTarget"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelDailyTarget"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section scripts{
+    @Scripts.Render("~/DailyTargetVsActual-JS")
+}

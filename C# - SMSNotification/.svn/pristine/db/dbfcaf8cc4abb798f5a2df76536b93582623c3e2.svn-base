@@ -1,0 +1,619 @@
+﻿"use strict";
+(function () {
+    const TemplateMaster = function () {
+        return new TemplateMaster.init();
+    }
+    TemplateMaster.init = function () {
+        $D.init.call(this);
+        this.$tblTemplate = "";
+        this.$TemplateID = 0;
+        this.$tblProcess = "";
+        this.$GlobalTemplateName = "";
+        this.$tblHourlyCheck = "";
+        this.$tblAfterCycle = "";
+    }
+    TemplateMaster.prototype = {
+        drawDatatables: function () {
+            var self = this;
+            if (!$.fn.DataTable.isDataTable('#tblTemplate')) {
+                self.$tblTemplate = $('#tblTemplate').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 25,
+                    "ajax": {
+                        "url": "/MasterMaintenance/TemplateMaster/GetTemplateHeaderList",
+                        "type": "POST",
+                        "datatype": "json",
+                    },
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        { title: "Template Name", data: "TemplateName" },
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                });
+            }
+            if (!$.fn.DataTable.isDataTable('#tblProcess')) {
+                self.$tblProcess = $('#tblProcess').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 25,
+                    "ajax": {
+                        "url": "/MasterMaintenance/TemplateMaster/GetProcessList",
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": function (d) {
+                            d.TemplateID = self.$TemplateID;
+                        }
+                    },
+
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        { title: "Template Name", data: "TemplateName" },
+                        { title: "Process Name", data: "ProcessName" },
+                        { title: "Datatype", data: "DataType" },
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                })
+            }
+            if (!$.fn.DataTable.isDataTable('#tblHourlyCheck')) {
+                self.$tblHourlyCheck = $('#tblHourlyCheck').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 25,
+                    "ajax": {
+                        "url": "/MasterMaintenance/TemplateMaster/GetHourlyCheckList",
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": function (d) {
+                            d.TemplateID = self.$TemplateID;
+                        }
+                    },
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        { title: "Template Name", data: "TemplateName" },
+                        { title: "Cycle Count", data: "CycleCount" },
+                        {
+                            title: "Interval", data: "Interval", render: function (data) {
+                                return parseFloat(data).toFixed(2);
+                            }
+                        },
+                        {
+                            title: "Temperature Cut", data: "TempCut", render: function (data) {
+                                return parseFloat(data).toFixed(2);
+                            }
+                        },
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                })
+            }
+            if (!$.fn.DataTable.isDataTable('#tblAfterCycle')) {
+                self.$tblAfterCycle = $('#tblAfterCycle').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 25,
+                    "ajax": {
+                        "url": "/MasterMaintenance/TemplateMaster/GetAfterCycleList",
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": function (d) {
+                            d.TemplateID = self.$TemplateID;
+                        }
+                    },
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        { title: "Template Name", data: "TemplateName" },
+                        { title: "Cycle Count", data: "CycleCount" },
+                        {
+                            title: "Interval", data: "Interval", render: function (data) {
+                                return parseFloat(data).toFixed(2);
+                            }
+                        },
+                        {
+                            title: "Temperature Limit", data: "TempLimit", render: function (data) {
+                                return parseFloat(data).toFixed(2);
+                            }
+                        },
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                })
+            }
+            return this;
+        },
+        cancelTemplateForm: function () {
+            var self = this;
+            self.clearFromData("frmTemplate");
+            $("#btnSaveTemplate .btnLabel").text(" Save");
+            $("#mdlTypeTitle").text(" Create Template");
+            $("#mdlTemplate").modal("hide");
+            return this;
+        },
+        cancelTemplateTbl: function () {
+            var self = this;
+            $('#btnEditTemplate').attr("disabled", "disabled");
+            $('#btnDeleteTemplate').attr("disabled", "disabled");
+            return this;
+        },
+        saveTemplate: function () {
+            var self = this;
+            self.formData = $('#frmTemplate').serializeArray();
+            self.formAction = '/MasterMaintenance/TemplateMaster/SaveTemplate';
+            self.setJsonData().sendData().then(function () {
+                self.cancelTemplateTbl();
+                self.cancelTemplateForm();
+                self.$tblTemplate.ajax.reload(null, false);
+            });
+            return this;
+        },
+        editTemplate: function () {
+            var self = this;
+            self.templateID = self.$tblTemplate.rows({ selected: true }).data()[0].ID;
+            self.jsonData = { ID: self.templateID };
+            self.formAction = '/MasterMaintenance/TemplateMaster/GetTemplateHeaderDetails';
+            self.sendData().then(function () {
+                self.populateTemplateData(self.responseData.templateData);
+            });
+            return this;
+        },
+        populateTemplateData: function (templateData) {
+            var self = this;
+            $("#frmTemplate").parsley().reset();
+            $("#btnSaveTemplate .btnLabel").text(" Update");
+            $("#mdlTypeTitle").text(" Edit Template");
+            $("#mdlTemplate").modal("show");
+            self.populateToFormInputs(templateData, "#frmTemplate");
+            return this;
+        },
+        deleteTemplate: function () {
+            var self = this;
+            self.templateID = self.$tblTemplate.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/MasterMaintenance/TemplateMaster/DeleteTemplate';
+            self.jsonData = { ID: self.templateID };
+            self.sendData().then(function () {
+                self.cancelTemplateTbl();
+                self.cancelTemplateForm();
+                self.$tblTemplate.ajax.reload(null, false);
+            });
+            return this;
+        },
+        validateTemplate: function (TemplateName) {
+            var self = this;
+            self.formAction = '/MasterMaintenance/TemplateMaster/ValidateTemplateName';
+            self.jsonData = { TemplateName: TemplateName };
+            self.sendData().then(function () {
+                if (!self.responseData.isValid) {
+                    $("#TemplateName").val("");
+                    self.showError("Template Name is already exists.");
+                }
+            });
+            return this;
+        },
+        NewProcessData: function () {
+            var self = this;
+            $("#mdlProcess").modal('show');
+            $("#TemplateNames").val(self.$GlobalTemplateName);
+            return this;
+        },
+        saveProcess: function (JsonDataList) {
+            var self = this;
+            self.jsonData = JsonDataList;
+            self.formAction = '/MasterMaintenance/TemplateMaster/SaveProcess';
+            self.sendData().then(function () {
+                self.cancelProcessTbl();
+                self.cancelProcessForm();
+                self.$tblProcess.ajax.reload(null, false);
+            });
+            return this;
+        },
+        cancelProcessForm: function () {
+            var self = this;
+            self.clearFromData("frmProcess");
+            $("#btnSaveProcess .btnLabel").text(" Save");
+            $("#mdlProcessTitle").text(" Create Process");
+            $("#mdlProcess").modal("hide");
+            return this;
+        },
+        cancelProcessTbl: function () {
+            var self = this;
+            $('#btnEditProcess').attr("disabled", "disabled");
+            $('#btnDeleteProcess').attr("disabled", "disabled");
+            return this;
+        },
+        editProcess: function () {
+            var self = this;
+            self.processID = self.$tblProcess.rows({ selected: true }).data()[0].ID;
+            self.jsonData = { ID: self.processID };
+            self.formAction = '/MasterMaintenance/TemplateMaster/GetProcessDetails';
+            self.sendData().then(function () {
+                self.populateProcessData(self.responseData.processData);
+            });
+            return this;
+        },
+        populateProcessData: function (processData) {
+            var self = this;
+            $("#frmProcess").parsley().reset();
+            $("#btnSaveProcess .btnLabel").text(" Update");
+            $("#mdlProcessTitle").text(" Edit Process");
+            var ProcessData = new Option(processData.ProcessName, processData.ProcessID, true, true);
+            $('#ProcessID').append(ProcessData).trigger('change');
+            $("#DataType").val(processData.DataType)
+            $("#ProcessIDs").val(processData.ID)
+            $("#TemplateNames").val(self.$GlobalTemplateName);
+            $("#mdlProcess").modal("show");
+            self.populateToFormInputs(processData, "#frmTemplate");
+            return this;
+        },
+        deleteProcess: function () {
+            var self = this;
+            self.processID = self.$tblProcess.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/MasterMaintenance/TemplateMaster/DeleteProcess';
+            self.jsonData = { ID: self.processID };
+            self.sendData().then(function () {
+                self.cancelProcessTbl();
+                self.cancelProcessForm();
+                self.$tblProcess.ajax.reload(null, false);
+            });
+            return this;
+        },
+        NewHourlyChecking: function () {
+            var self = this;
+            $("#mdlHourlyChecking").modal('show');
+            $("#HTemplateNames").val(self.$GlobalTemplateName);
+            return this;
+        },
+        saveHourlyChecking: function (JsonDataList) {
+            var self = this;
+            self.jsonData = JsonDataList;
+            self.formAction = '/MasterMaintenance/TemplateMaster/SaveHourlyChecking';
+            self.sendData().then(function () {
+                self.cancelHourlyCheckingTbl();
+                self.cancelHourlyCheckingForm();
+                self.$tblHourlyCheck.ajax.reload(null, false);
+            });
+            return this;
+        },
+        cancelHourlyCheckingForm: function () {
+            var self = this;
+            self.clearFromData("frmHourlyChecking");
+            $("#btnSaveHourlyChecking .btnLabel").text(" Save");
+            $("#mdlHourlyCheckingTitle").text(" Create Hourly Checking");
+            $("#mdlHourlyChecking").modal("hide");
+            return this;
+        },
+        cancelHourlyCheckingTbl: function () {
+            var self = this;
+            $('#btnEditHourlyCheck').attr("disabled", "disabled");
+            $('#btnDeleteHourlyCheck').attr("disabled", "disabled");
+            return this;
+        },
+        editHourlyChecking: function () {
+            var self = this;
+            self.hourlycheckID = self.$tblHourlyCheck.rows({ selected: true }).data()[0].ID;
+            self.jsonData = { ID: self.hourlycheckID };
+            self.formAction = '/MasterMaintenance/TemplateMaster/GetHourlyCheckingDetails';
+            self.sendData().then(function () {
+                self.populateHourlyCheckingData(self.responseData.hourlycheckData);
+            });
+            return this;
+        },
+        populateHourlyCheckingData: function (hourlyCheckData) {
+            var self = this;
+            $("#frmHourlyChecking").parsley().reset();
+            $("#btnSaveHourlyChecking .btnLabel").text(" Update");
+            $("#mdlHourlyCheckingTitle").text(" Edit HourlyCheck");
+            $("#Interval").val(parseFloat(hourlyCheckData.Interval).toFixed(2))
+            $("#TempCut").val(parseFloat(hourlyCheckData.TempCut).toFixed(2))
+            $("#HourlyCheckingIDs").val(hourlyCheckData.ID)
+            $("#HTemplateNames").val(self.$GlobalTemplateName);
+            $("#mdlHourlyChecking").modal("show");
+            self.populateToFormInputs(hourlyCheckData, "#frmHourlyChecking");
+            return this;
+        },
+        deleteHourlyCheck: function () {
+            var self = this;
+            self.hourlycheckID = self.$tblHourlyCheck.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/MasterMaintenance/TemplateMaster/DeleteHourlyCheck';
+            self.jsonData = { ID: self.hourlycheckID };
+            self.sendData().then(function () {
+                self.cancelHourlyCheckingTbl();
+                self.cancelHourlyCheckingForm();
+                self.$tblHourlyCheck.ajax.reload(null, false);
+            });
+            return this;
+        },
+        NewAfterCycle: function () {
+            var self = this;
+            $("#mdlAfterCycle").modal('show');
+            $("#ATemplateNames").val(self.$GlobalTemplateName);
+            return this;
+        },
+        saveAfterCycle: function (JsonDataList) {
+            var self = this;
+            self.jsonData = JsonDataList;
+            self.formAction = '/MasterMaintenance/TemplateMaster/SaveAfterCycle';
+            self.sendData().then(function () {
+                self.cancelAfterCycleTbl();
+                self.cancelAfterCycleForm();
+                self.$tblAfterCycle.ajax.reload(null, false);
+            });
+            return this;
+        },
+        cancelAfterCycleForm: function () {
+            var self = this;
+            self.clearFromData("frmAfterCycle");
+            $("#btnSaveAfterCycle .btnLabel").text(" Save");
+            $("#mdlAfterCycleTitle").text(" Create After Cycle");
+            $("#mdlAfterCycle").modal("hide");
+            return this;
+        },
+        cancelAfterCycleTbl: function () {
+            var self = this;
+            $('#btnEditAfterCycle').attr("disabled", "disabled");
+            $('#btnDeleteAfterCycle').attr("disabled", "disabled");
+            return this;
+        },
+        editAfterCycle: function () {
+            var self = this;
+            self.aftercycleID = self.$tblAfterCycle.rows({ selected: true }).data()[0].ID;
+            self.jsonData = { ID: self.aftercycleID };
+            self.formAction = '/MasterMaintenance/TemplateMaster/GetAfterCycleDetails';
+            self.sendData().then(function () {
+                self.populateAfterCycleData(self.responseData.aftercycleData);
+            });
+            return this;
+        },
+        populateAfterCycleData: function (aftercycleData) {
+            var self = this;
+            $("#frmAfterCycle").parsley().reset();
+            $("#btnSaveAfterCycle .btnLabel").text(" Update");
+            $("#mdlAfterCycleTitle").text(" Edit HourlyCheck");
+            $("#AInterval").val(parseFloat(aftercycleData.Interval).toFixed(2))
+            $("#TempLimit").val(parseFloat(aftercycleData.TempLimit).toFixed(2))
+            $("#AfterCycleIDs").val(aftercycleData.ID)
+            $("#ATemplateNames").val(self.$GlobalTemplateName);
+            $("#mdlAfterCycle").modal("show");
+            self.populateToFormInputs(aftercycleData, "#frmAfterCycle");
+            return this;
+        },
+        deleteAfterCycle: function () {
+            var self = this;
+            self.aftercycleID = self.$tblAfterCycle.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/MasterMaintenance/TemplateMaster/DeleteAfterCycle';
+            self.jsonData = { ID: self.aftercycleID };
+            self.sendData().then(function () {
+                self.cancelAfterCycleTbl();
+                self.cancelAfterCycleForm();
+                self.$tblAfterCycle.ajax.reload(null, false);
+            });
+            return this;
+        },
+    };
+    TemplateMaster.init.prototype = $.extend(TemplateMaster.prototype, $D.init.prototype);
+    TemplateMaster.init.prototype = TemplateMaster.prototype;
+    $(document).ready(function () {
+        var Template = TemplateMaster();
+        Template.drawDatatables();
+        $("#btnNewTemplate").click(function () {
+            $("#mdlTemplate").modal('show');
+        });
+        $("#frmTemplate").submit(function (e) {
+            e.preventDefault();
+            Template.saveTemplate();
+        });
+        $("#btnEditTemplate").click(function () {
+            Template.editTemplate();
+        });
+        $('#btnDeleteTemplate').click(function () {
+            Template.msg = "Are you sure you want to delete this Template?";
+            Template.confirmAction().then(function (approve) {
+                if (approve)
+                    Template.deleteTemplate();
+            });
+        });
+        $("#TemplateName").on('change', function () {
+            var dataSelected = $(this).val().trim();
+            Template.validateTemplate(dataSelected);
+        });
+        $("#btnCancelTemplate").click(function () {
+            Template.cancelTemplateForm();
+        });
+        //Process
+        $("#btnNewProcess").click(function () {
+            Template.NewProcessData();
+        });
+        $('#mdlProcess').on('shown.bs.modal', function (e) {
+            $('#ProcessID').select2({
+                ajax: {
+                    url: "/General/MySQLGetSelect2Data",
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            id: 'ID',
+                            text: 'Process',
+                            table: 'mOperation',
+                            db: 'SHIN-ETSU-MYSQL',
+                            condition: '',
+                            display: 'id&text'
+                        };
+                    },
+                },
+                placeholder: '--Please Select--',
+            })
+        });
+        $("#frmProcess").submit(function (e) {
+            e.preventDefault();
+            var json = "";
+            json = {
+                ID: parseInt($("#ProcessIDs").val()),
+                TemplateNameID: Template.$TemplateID,
+                ProcessID: parseInt($("#ProcessID").val()),
+                DataType: $("#DataType").val()
+            }
+            Template.saveProcess(json);
+        });
+        $("#btnEditProcess").click(function () {
+            Template.editProcess();
+        });
+        $('#btnDeleteProcess').click(function () {
+            Template.msg = "Are you sure you want to delete this Process?";
+            Template.confirmAction().then(function (approve) {
+                if (approve)
+                    Template.deleteProcess();
+            });
+        });
+        $("#btnCancelProcess").click(function () {
+            Template.cancelProcessForm();
+        });
+        //Hourly Checking
+        $("#btnNewHourlyCheck").click(function () {
+            Template.NewHourlyChecking();
+        });
+        $("#frmHourlyChecking").submit(function (e) {
+            e.preventDefault();
+            var json = "";
+            json = {
+                ID: parseInt($("#HourlyCheckingIDs").val()),
+                TemplateNameID: Template.$TemplateID,
+                TempCut: $("#TempCut").val(),
+                Interval: $("#Interval").val(),
+            }
+            Template.saveHourlyChecking(json);
+        });
+        $("#btnCancelHourlyChecking").click(function () {
+            Template.cancelHourlyCheckingForm();
+        });
+        $("#btnEditHourlyCheck").click(function () {
+            Template.editHourlyChecking();
+        });
+        $('#btnDeleteHourlyCheck').click(function () {
+            Template.msg = "Are you sure you want to delete this Hourly Check?";
+            Template.confirmAction().then(function (approve) {
+                if (approve)
+                    Template.deleteHourlyCheck();
+            });
+        });
+        //After Cycle
+        $("#btnNewAfterCycle").click(function () {
+            Template.NewAfterCycle();
+        });
+        $("#frmAfterCycle").submit(function (e) {
+            e.preventDefault();
+            var json = "";
+            json = {
+                ID: parseInt($("#AfterCycleIDs").val()),
+                TemplateNameID: Template.$TemplateID,
+                TempLimit: $("#TempLimit").val(),
+                Interval: $("#AInterval").val(),
+            }
+            Template.saveAfterCycle(json);
+        });
+        $("#btnCancelAfterCycle").click(function () {
+            Template.cancelAfterCycleForm();
+        });
+        $("#btnEditAfterCycle").click(function () {
+            Template.editAfterCycle();
+        });
+        $('#btnDeleteAfterCycle').click(function () {
+            Template.msg = "Are you sure you want to delete this After Cycle?";
+            Template.confirmAction().then(function (approve) {
+                if (approve)
+                    Template.deleteAfterCycle();
+            });
+        });
+        Template.$tblTemplate.on('draw.dt', function () {
+            CUI.dataTableID = "#tblTemplate";
+            CUI.setDatatableMaxHeightFixed();
+        });
+        Template.$tblTemplate.on('select', function (e, dt, type, indexes) {
+            var templateID = Template.$tblTemplate.rows({ selected: true }).data()[0].ID;
+            var templateName = Template.$tblTemplate.rows({ selected: true }).data()[0].TemplateName;
+            Template.$TemplateID = templateID;
+            Template.$GlobalTemplateName = templateName;
+            $('#btnDeleteTemplate').removeAttr("disabled");
+            $('#btnNewProcess').removeAttr("disabled");
+            $('#btnEditTemplate').removeAttr("disabled");
+            $('#btnNewHourlyCheck').removeAttr("disabled");
+            $('#btnNewAfterCycle').removeAttr("disabled");
+            Template.$tblProcess.ajax.reload(null, false);
+            Template.$tblHourlyCheck.ajax.reload(null, false);
+            Template.$tblAfterCycle.ajax.reload(null, false);
+        });
+        Template.$tblTemplate.on('deselect', function (e, dt, type, indexes) {
+            Template.$TemplateID = 0;
+            Template.$GlobalTemplateName = "";
+            $('#btnDeleteTemplate').attr("disabled", "disabled");
+            $('#btnNewProcess').attr("disabled", "disabled");
+            $('#btnEditTemplate').attr("disabled", "disabled");
+            $('#btnNewHourlyCheck').attr("disabled", "disabled");
+            $('#btnNewAfterCycle').attr("disabled", "disabled");
+            Template.$tblProcess.ajax.reload(null, false);
+            Template.$tblHourlyCheck.ajax.reload(null, false);
+            Template.$tblAfterCycle.ajax.reload(null, false);
+        });
+        Template.$tblProcess.on('draw.dt', function () {
+            CUI.dataTableID = "#tblProcess";
+            CUI.setDatatableMaxHeightFixed();
+        });
+        Template.$tblProcess.on('select', function (e, dt, type, indexes) {
+            $('#btnDeleteProcess').removeAttr("disabled");
+            $('#btnEditProcess').removeAttr("disabled");
+        });
+        Template.$tblProcess.on('deselect', function (e, dt, type, indexes) {
+            $('#btnDeleteProcess').attr("disabled", "disabled");
+            $('#btnEditProcess').attr("disabled", "disabled");
+        });
+        Template.$tblHourlyCheck.on('draw.dt', function () {
+            CUI.dataTableID = "#tblHourlyCheck";
+            CUI.setDatatableMaxHeightFixed();
+        });
+        Template.$tblHourlyCheck.on('select', function (e, dt, type, indexes) {
+            $('#btnDeleteHourlyCheck').removeAttr("disabled");
+            $('#btnEditHourlyCheck').removeAttr("disabled");
+        });
+        Template.$tblHourlyCheck.on('deselect', function (e, dt, type, indexes) {
+            $('#btnDeleteHourlyCheck').attr("disabled", "disabled");
+            $('#btnEditHourlyCheck').attr("disabled", "disabled");
+        });
+        Template.$tblAfterCycle.on('draw.dt', function () {
+            CUI.dataTableID = "#tblAfterCycle";
+            CUI.setDatatableMaxHeightFixed();
+            var tbldata = Template.getDataTableData(Template.$tblAfterCycle.rows().data());
+            if (tbldata.length <= 0) {
+                $("#btnNewAfterCycle").show();
+                $("#btnDeleteAfterCycle").show();
+            }
+            else {
+                $("#btnNewAfterCycle").hide();
+                $("#btnDeleteAfterCycle").hide();
+            }
+        });
+
+        Template.$tblAfterCycle.on('select', function (e, dt, type, indexes) {
+            $('#btnEditAfterCycle').removeAttr("disabled");
+            $('#btnDeleteAfterCycle').removeAttr("disabled");
+        });
+        Template.$tblAfterCycle.on('deselect', function (e, dt, type, indexes) {
+            $('#btnEditAfterCycle').attr("disabled", "disabled");
+            $('#btnDeleteAfterCycle').attr("disabled", "disabled");
+        });
+    });
+})();

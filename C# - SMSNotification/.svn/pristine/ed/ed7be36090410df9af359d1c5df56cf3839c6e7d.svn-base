@@ -1,0 +1,927 @@
+﻿using Kedica.Areas.MasterMaintenance.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web.Mvc;
+
+namespace Kedica.Areas.MasterMaintenance.Controllers
+{
+    public class TemplateMasterController : Controller
+    {
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+        // GET: MasterMaintenance/TemplateMaster
+        public ActionResult Index()
+        {
+            return View("TemplateMaster");
+        }
+        #region Template Header
+        public ActionResult GetTemplateHeaderList()
+        {
+            List<mTemplate> data = new List<mTemplate>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetHeaderDatalist";
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new mTemplate
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    TemplateName = sdr["TemplateName"].ToString()
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.TemplateName.ToLower().Contains(searchValue.ToLower())
+                ).ToList<mTemplate>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<mTemplate>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveTemplate(mTemplate TypeObj)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdSql = conn.CreateCommand())
+                        {
+                            cmdSql.CommandType = CommandType.StoredProcedure;
+                            cmdSql.CommandText = "Template_Header_InsertUpdate";
+                            cmdSql.Parameters.Clear();
+                            cmdSql.Parameters.AddWithValue("@_ID", TypeObj.ID);
+                            cmdSql.Parameters.AddWithValue("@_TemplateName", TypeObj.TemplateName);
+                            cmdSql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                            MySqlParameter EndMsg = cmdSql.Parameters.Add("@EndMsg", MySqlDbType.VarChar, 200);
+                            MySqlParameter ErrorMessage = cmdSql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 200);
+                            MySqlParameter Error = cmdSql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            EndMsg.Direction = ParameterDirection.Output;
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdSql.ExecuteNonQuery();
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+
+                            endMsg = EndMsg.Value.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Template was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetTemplateHeaderDetails(int ID)
+        {
+            mTemplate templateDetails = new mTemplate();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetHeaderDatalistByID";
+                        cmdMyMySql.Parameters.AddWithValue("@TemplateID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            templateDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            templateDetails.TemplateName = sdr["TemplateName"].ToString();
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { templateData = templateDetails } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteTemplate(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_DeleteHeader";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@TemplateID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Template was successfully deleted." });
+
+        }
+        public ActionResult ValidateTemplateName(string TemplateName)
+        {
+            var isValid = true;
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdSql = conn.CreateCommand())
+                    {
+                        cmdSql.CommandType = CommandType.StoredProcedure;
+                        cmdSql.CommandText = "Template_ValidateHeader";
+                        cmdSql.Parameters.AddWithValue("@_TemplateName", TemplateName);
+                        using (MySqlDataReader sdr = cmdSql.ExecuteReader())
+                        {
+                            if (sdr.HasRows)
+                                isValid = false;
+                        }
+
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.Message.ToString(); ;
+                error = true;
+            }
+            if (error)
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            else
+                return Json(new { success = true, data = new { isValid = isValid } }, JsonRequestBehavior.AllowGet);
+
+        }
+        #endregion
+        #region Process
+        public ActionResult GetProcessList()
+        {
+            List<ProcessList> data = new List<ProcessList>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+            int TemplateID = Convert.ToInt32(Request["TemplateID"]);
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetProcessList";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_TemplateID", TemplateID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new ProcessList
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    TemplateName = sdr["TemplateName"].ToString(),
+                                    TemplateNameID = Convert.ToInt32(sdr["TemplateNameID"]),
+                                    ProcessName = sdr["ProcessName"].ToString(),
+                                    ProcessID = Convert.ToInt32(sdr["ProcessID"]),
+                                    DataType = sdr["Datatype"].ToString()
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.TemplateName.ToLower().Contains(searchValue.ToLower()) ||
+                    x.ProcessName.ToLower().Contains(searchValue.ToLower()) ||
+                    x.DataType.ToLower().Contains(searchValue.ToLower())
+                ).ToList<ProcessList>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<ProcessList>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveProcess(ProcessList TypeObj)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdSql = conn.CreateCommand())
+                        {
+                            cmdSql.CommandType = CommandType.StoredProcedure;
+                            cmdSql.CommandText = "Template_Process_InsertUpdate";
+                            cmdSql.Parameters.Clear();
+                            cmdSql.Parameters.AddWithValue("@_ID", TypeObj.ID);
+                            cmdSql.Parameters.AddWithValue("@_TemplateNameID", TypeObj.TemplateNameID);
+                            cmdSql.Parameters.AddWithValue("@_ProcessID", TypeObj.ProcessID);
+                            cmdSql.Parameters.AddWithValue("@_DataType", TypeObj.DataType);
+                            cmdSql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                            MySqlParameter EndMsg = cmdSql.Parameters.Add("@EndMsg", MySqlDbType.VarChar, 200);
+                            MySqlParameter ErrorMessage = cmdSql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 200);
+                            MySqlParameter Error = cmdSql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            EndMsg.Direction = ParameterDirection.Output;
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdSql.ExecuteNonQuery();
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+
+                            endMsg = EndMsg.Value.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Process was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetProcessDetails(int ID)
+        {
+            ProcessList processDetails = new ProcessList();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetProcessDatalistByID";
+                        cmdMyMySql.Parameters.AddWithValue("@ProcessID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            processDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            processDetails.TemplateName = sdr["TemplateName"].ToString();
+                            processDetails.TemplateNameID = Convert.ToInt32(sdr["TemplateNameID"]);
+                            processDetails.ProcessName = sdr["ProcessName"].ToString();
+                            processDetails.ProcessID = Convert.ToInt32(sdr["ProcessID"]);
+                            processDetails.DataType = sdr["Datatype"].ToString();
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { processData = processDetails } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteProcess(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_DeleteProcess";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@ProcessID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Process was successfully deleted." });
+
+        }
+        #endregion
+        #region Hourly Checking
+        public ActionResult GetHourlyCheckList()
+        {
+            List<HourlyChecking> data = new List<HourlyChecking>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+            int TemplateID = Convert.ToInt32(Request["TemplateID"]);
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetHourlyCheckList";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_TemplateID", TemplateID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new HourlyChecking
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    TemplateName = sdr["TemplateName"].ToString(),
+                                    TemplateNameID = Convert.ToInt32(sdr["TemplateNameID"]),
+                                    CycleCount = Convert.ToInt32(sdr["CycleCount"]),
+                                    TempCut = Convert.ToDecimal(sdr["TempCut"]),
+                                    Interval = Convert.ToDecimal(sdr["Interval"])
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.TemplateName.ToLower().Contains(searchValue.ToLower()) ||
+                    x.CycleCount.ToString().Contains(searchValue.ToLower()) ||
+                    x.TempCut.ToString().Contains(searchValue.ToLower())
+                ).ToList<HourlyChecking>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<HourlyChecking>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveHourlyChecking(HourlyChecking TypeObj)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdSql = conn.CreateCommand())
+                        {
+                            cmdSql.CommandType = CommandType.StoredProcedure;
+                            cmdSql.CommandText = "Template_HourlyChecking_InsertUpdate";
+                            cmdSql.Parameters.Clear();
+                            cmdSql.Parameters.AddWithValue("@_ID", TypeObj.ID);
+                            cmdSql.Parameters.AddWithValue("@_TemplateNameID", TypeObj.TemplateNameID);
+                            cmdSql.Parameters.AddWithValue("@_Interval", Convert.ToDecimal(TypeObj.Interval));
+                            cmdSql.Parameters.AddWithValue("@_TempCut", Convert.ToDecimal(TypeObj.TempCut));
+                            cmdSql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                            MySqlParameter EndMsg = cmdSql.Parameters.Add("@EndMsg", MySqlDbType.VarChar, 200);
+                            MySqlParameter ErrorMessage = cmdSql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 200);
+                            MySqlParameter Error = cmdSql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            EndMsg.Direction = ParameterDirection.Output;
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdSql.ExecuteNonQuery();
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+
+                            endMsg = EndMsg.Value.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Hourly Checking was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetHourlyCheckingDetails(int ID)
+        {
+            HourlyChecking hourlycheckDetails = new HourlyChecking();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetHourlyCheckingDatalistByID";
+                        cmdMyMySql.Parameters.AddWithValue("@HourlyCheckingID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            hourlycheckDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            hourlycheckDetails.TemplateName = sdr["TemplateName"].ToString();
+                            hourlycheckDetails.TemplateNameID = Convert.ToInt32(sdr["TemplateNameID"]);
+                            hourlycheckDetails.Interval = Convert.ToDecimal(sdr["Interval"]);
+                            hourlycheckDetails.TempCut = Convert.ToDecimal(sdr["TempCut"]);
+
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { hourlycheckData = hourlycheckDetails } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteHourlyCheck(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_DeleteHourlyCheck";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@HourlyCheckID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Hourly Checking was successfully deleted." });
+
+        }
+        #endregion
+        #region After Cycle 
+        public ActionResult GetAfterCycleList()
+        {
+            List<AfterCycle> data = new List<AfterCycle>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+            int TemplateID = Convert.ToInt32(Request["TemplateID"]);
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetAfterCycleList";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_TemplateID", TemplateID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new AfterCycle
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    TemplateName = sdr["TemplateName"].ToString(),
+                                    TemplateNameID = Convert.ToInt32(sdr["TemplateNameID"]),
+                                    CycleCount = Convert.ToInt32(sdr["CycleCount"]),
+                                    TempLimit = Convert.ToDecimal(sdr["TempLimit"]),
+                                    Interval = Convert.ToDecimal(sdr["Interval"])
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.TemplateName.ToLower().Contains(searchValue.ToLower()) ||
+                    x.CycleCount.ToString().Contains(searchValue.ToLower()) ||
+                    x.TempLimit.ToString().Contains(searchValue.ToLower())
+                ).ToList<AfterCycle>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<AfterCycle>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveAfterCycle(AfterCycle TypeObj)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdSql = conn.CreateCommand())
+                        {
+                            cmdSql.CommandType = CommandType.StoredProcedure;
+                            cmdSql.CommandText = "Template_AfterCycle_InsertUpdate";
+                            cmdSql.Parameters.Clear();
+                            cmdSql.Parameters.AddWithValue("@_ID", TypeObj.ID);
+                            cmdSql.Parameters.AddWithValue("@_TemplateNameID", TypeObj.TemplateNameID);
+                            cmdSql.Parameters.AddWithValue("@_Interval", Convert.ToDecimal(TypeObj.Interval));
+                            cmdSql.Parameters.AddWithValue("@_TempLimit", Convert.ToDecimal(TypeObj.TempLimit));
+                            cmdSql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                            MySqlParameter EndMsg = cmdSql.Parameters.Add("@EndMsg", MySqlDbType.VarChar, 200);
+                            MySqlParameter ErrorMessage = cmdSql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 200);
+                            MySqlParameter Error = cmdSql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            EndMsg.Direction = ParameterDirection.Output;
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdSql.ExecuteNonQuery();
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+
+                            endMsg = EndMsg.Value.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "After Cycle was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetAfterCycleDetails(int ID)
+        {
+            AfterCycle aftercycleDetails = new AfterCycle();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_GetAfterCycleDatalistByID";
+                        cmdMyMySql.Parameters.AddWithValue("@AfterCycleID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            aftercycleDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            aftercycleDetails.TemplateName = sdr["TemplateName"].ToString();
+                            aftercycleDetails.TemplateNameID = Convert.ToInt32(sdr["TemplateNameID"]);
+                            aftercycleDetails.Interval = Convert.ToDecimal(sdr["Interval"]);
+                            aftercycleDetails.TempLimit = Convert.ToDecimal(sdr["TempLimit"]);
+
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { aftercycleData = aftercycleDetails } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteAfterCycle(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Template_DeleteAfterCycle";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@AFterCycleID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "After Cycle was successfully deleted." });
+
+        }
+        #endregion
+    }
+}

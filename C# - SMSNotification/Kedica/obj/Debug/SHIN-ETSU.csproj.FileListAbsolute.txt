@@ -1,0 +1,219 @@
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\ApplicationInsights.config
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\csc.exe
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\vbc.exe
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Antlr3.Runtime.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\EntityFramework.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\EntityFramework.SqlServer.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.Agent.Intercept.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.DependencyCollector.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.PerfCounterCollector.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.ServerTelemetryChannel.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.Web.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.WindowsServer.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.ApplicationInsights.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AspNet.Identity.Core.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AspNet.Identity.EntityFramework.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AspNet.Identity.Owin.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Host.SystemWeb.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Cookies.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Facebook.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Google.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.MicrosoftAccount.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.OAuth.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Twitter.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Web.Infrastructure.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Newtonsoft.Json.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Owin.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Helpers.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Mvc.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Optimization.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Razor.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.WebPages.Deployment.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.WebPages.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.WebPages.Razor.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\WebGrease.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.DependencyCollector.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.ServerTelemetryChannel.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.Web.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AI.WindowsServer.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.ApplicationInsights.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Helpers.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Mvc.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Optimization.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.Razor.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.WebPages.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.WebPages.Deployment.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\System.Web.WebPages.Razor.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Antlr3.Runtime.pdb
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Newtonsoft.Json.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\EntityFramework.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\EntityFramework.SqlServer.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AspNet.Identity.Core.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AspNet.Identity.Owin.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.AspNet.Identity.EntityFramework.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Host.SystemWeb.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Facebook.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Cookies.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.OAuth.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Google.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.Twitter.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\obj\Debug\SHIN-ETSU.csprojAssemblyReference.cache
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\obj\Debug\SHIN-ETSU.csproj.CoreCompileInputs.cache
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\obj\Debug\SHIN-ETSU.csproj.CopyComplete
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\SHIN-ETSU.dll.config
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\SHIN-ETSU.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\bin\SHIN-ETSU.pdb
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\obj\Debug\SHIN-ETSU.dll
+C:\Users\j.perez\Desktop\SHIN-ETSU\Kedica\obj\Debug\SHIN-ETSU.pdb
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\ApplicationInsights.config
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\csc.exe
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\vbc.exe
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.dll.config
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.pdb
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\EPPlus.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\MySql.Data.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\System.Buffers.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\System.Memory.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\Zstandard.Net.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\EPPlus.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.pdb
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\MySql.Data.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\System.Buffers.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\System.Memory.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csprojAssemblyReference.cache
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csproj.CoreCompileInputs.cache
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csproj.CopyComplete
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.dll
+C:\Users\j.perez\Desktop\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.pdb
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\ApplicationInsights.config
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\csc.exe
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\vbc.exe
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.dll.config
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.pdb
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\EPPlus.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\MySql.Data.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\System.Buffers.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\System.Memory.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\Zstandard.Net.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\EPPlus.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.pdb
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\MySql.Data.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\System.Buffers.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\System.Memory.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csproj.CoreCompileInputs.cache
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csproj.CopyComplete
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.dll
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.pdb
+C:\Users\j.perez\Desktop\Projects\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csprojAssemblyReference.cache
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\ApplicationInsights.config
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\csc.exe
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\vbc.exe
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.dll.config
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\SHIN-ETSU.pdb
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\EPPlus.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\MySql.Data.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Buffers.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Memory.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Zstandard.Net.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\EPPlus.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.pdb
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\MySql.Data.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Buffers.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Memory.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csproj.CoreCompileInputs.cache
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csproj.CopyComplete
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.pdb
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SHIN-ETSU.csprojAssemblyReference.cache

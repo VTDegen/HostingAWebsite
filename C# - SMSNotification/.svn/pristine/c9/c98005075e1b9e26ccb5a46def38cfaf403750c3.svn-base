@@ -1,0 +1,351 @@
+﻿
+@{
+    ViewBag.Title = "Hydration Process";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/HydrationProcess-CSS")
+    <style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ul {
+            list-style: none;
+        }
+    </style>}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-4 m-b-5 ReadAndWrite">
+                        <button type="button" id="btnAddHydrationProcess" class="btn btn-sm btn-primary btn-block"><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                    </div>
+                    <div class="col-sm-4 m-b-5 ReadAndWrite">
+                        <button type="button" id="btnEditHydrationProcess" class="btn btn-sm btn-info btn-block tbl-tr-btns" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                    </div>
+                    <div class="col-sm-4 m-b-5 DeleteEnabled">
+                        <button type="button" id="btnDeleteHydrationProcess" class="btn btn-sm btn-danger btn-block tbl-tr-btns" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hljs-wrapper">
+            <table id="tblHydrationProcess" class="table   table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlHydration" role="dialog" aria-hidden="true" style="overflow:auto;" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl  tbl-50p" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlHydrationTitle"> Create Hydration</h4>
+                <button type="button" class="close" id="btnUpClosedMdl" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmHydration">
+                <div class="modal-body">
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <input type="hidden" id="MixerNoHiddenData" name="MixerNoHiddenData" class="form-control input " data-parsley-maxlength="50" autocomplete="off">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="MixerNo">Mixer No <span class="text-danger">*</span></label>
+                                </div>
+                                <select class="form-control input form-control-sm custom-select" id="MixerNo" name="MixerNo" required data-parsley-errors-container="#err-MixerNo">
+                                    <option value="">Choose Mixer No</option>
+                                </select>
+                            </div>
+                            <div id="err-MixerNo"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="hidden" id="CycleHiddenData" name="CycleHiddenData" class="form-control input " data-parsley-maxlength="50" autocomplete="off">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="Cycle">Cycle <span class="text-danger">*</span></label>
+                                </div>
+                                <select class="form-control input form-control-sm custom-select" id="Cycle" name="Cycle" required data-parsley-errors-container="#err-Cycle">
+                                    <option value="">Choose Mixer No</option>
+                                </select>
+                            </div>
+                            <div id="err-Cycle"></div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="ProcessDate">Process Date <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="ProcessDate" name="ProcessDate" class="form-control input hasdatepicker" data-parsley-required data-parsley-maxlength="20" data-parsley-errors-container="#err-ProcessDate" autocomplete="off">
+                            </div>
+                            <div id="err-ProcessDate"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="hidden" id="ProductionStaffHiddenData" name="ProductionStaffHiddenData" class="form-control input " data-parsley-maxlength="50" autocomplete="off">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="ProductionStaff">Production Staff <span class="text-danger">*</span></label>
+                                </div>
+                                <select class="form-control input form-control-sm custom-select" id="ProductionStaff" name="ProductionStaff" required data-parsley-errors-container="#err-ProductionStaff">
+                                    <option value="">Choose Production Staff</option>
+                                </select>
+                            </div>
+                            <div id="err-ProductionStaff"></div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="ProcessCode">Process Code <span class="text-danger"></span></label>
+                                </div>
+                                <input readonly type="text" id="ProcessCode" name="ProcessCode" class="form-control input" data-parsley-maxlength="50" data-parsley-errors-container="#err-ProcessCode" autocomplete="off">
+                            </div>
+                            <div id="err-ProcessCode"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="TemplateData">Template <span class="text-danger"></span></label>
+                                </div>
+                                <select class="form-control  form-control-sm custom-select" id="TemplateData" name="TemplateData" disabled>
+                                    <option value="1">Template 1</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="panel panel-inverse">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Process</h4>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="hljs-wrapper">
+                                        <table id="tblProcessList" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="panel panel-inverse">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Summary</h4>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row ">
+                                        <div class="col-sm-12">
+                                            <div class="input-group bootstrap-timepicker timepicker">
+                                                <div class="input-group input-group-sm m-b-5">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text" style="width:156px;" for="UnloadingTime">Unloading Time Finished<span class="text-danger"></span></label>
+                                                    </div>
+                                                    <input type="text" id="UnloadingTime" class="form-control UnloadingTime input-small hastimepicker UnloadingTime" data-parsley-errors-container="#err-UnloadingTime"> <span class="input-group-addon" style="width:55px!important"><i class="fa fa-clock"></i></span>
+                                                </div>
+                                            </div>
+                                            <div id="err-UnloadingTime"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row ">
+                                        <div class="col-sm-12">
+                                            <div class="input-group bootstrap-timepicker timepicker">
+                                                <div class="input-group input-group-sm m-b-5">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text" style="width:156px;" for="UnloadingTime">Mixing Time Finished<span class="text-danger"></span></label>
+                                                    </div>
+                                                    <input type="text" id="MixingTimeFinished" class="form-control UnloadingTime input-small hastimepicker MixingTimeFinished" data-parsley-errors-container="#err-MixingTimeFinished"> <span class="input-group-addon" style="width:55px!important"><i class="fa fa-clock"></i></span>
+                                                </div>
+                                            </div>
+                                            <div id="err-MixingTimeFinished"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row ">
+                                        <div class="col-sm-12">
+                                            <div class="input-group input-group-sm m-b-5">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" style="width:156px;" for="OutputWeight">Output Weight (kg) <span class="text-danger"></span></label>
+                                                </div>
+                                                <input type="text" id="OutputWeight" name="OutputWeight" class="form-control input" data-parsley-maxlength="50" data-parsley-errors-container="#err-OutputWeight" autocomplete="off">
+                                            </div>
+                                            <div id="err-OutputWeight"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row ">
+                                        <div class="col-sm-12">
+                                            <div class="input-group input-group-sm m-b-5">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" style="width:156px;" for="TotalCycleTime">Total Cycle Time <span class="text-danger"></span></label>
+                                                </div>
+                                                <input type="text" id="TotalCycleTime" name="TotalCycleTime" class="form-control input" data-parsley-maxlength="50" data-parsley-errors-container="#err-TotalCycleTime" autocomplete="off">
+                                            </div>
+                                            <div id="err-TotalCycleTime"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row ">
+                                        <div class="col-sm-12">
+                                            <div class="input-group input-group-sm m-b-5">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" style="width:156px;" for="Total Water Input">Total Water Input<span class="text-danger"></span></label>
+                                                </div>
+                                                <input type="text" id="TotalWaterInput" name="TotalWaterInput" class="form-control input" data-parsley-maxlength="50" data-parsley-errors-container="#err-TotalWaterInput" autocomplete="off">
+                                            </div>
+                                            <div id="err-TotalWaterInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row ">
+                                        <div class="col-sm-12">
+                                            <div class="input-group input-group-sm m-b-5">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" style="width:156px;" for="OutputResult">Output Result<span class="text-danger"></span></label>
+                                                </div>
+                                                <input type="text" id="OutputResult" name="OutputResult" class="form-control input" data-parsley-maxlength="50" data-parsley-errors-container="#err-OutputResult" autocomplete="off">
+                                            </div>
+                                            <div id="err-OutputResult"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="panel panel-inverse">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">After Finished Cycle</h4>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="hljs-wrapper">
+                                        <table id="tblAfterCycle" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="panel panel-inverse">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Hourly Checking</h4>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="hljs-wrapper">
+                                        <table id="tblHourlyChecking" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row ">
+                        <div class="col-sm-12">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:156px;" for="Remarks">Remarks<span class="text-danger"></span></label>
+                                </div>
+                                <input type="text" id="Remarks" name="Remarks" class="form-control input" data-parsley-maxlength="255" data-parsley-errors-container="#err-Remarks" autocomplete="off">
+                            </div>
+                            <div id="err-Remarks"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" id="HydrationID" class="input" value="0" />
+                    <button type="button" class="btn btn-sm btn-info mr-auto" id="btnCompletedData"><span class="fa fa-check-square"></span> Completed</button>
+                    <button type="button" class="btn btn-sm btn-info " id="btnShowTransaction"><span class="fa fa-history"></span> Transaction History</button>
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveHydration"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" id="btnCancelHydration"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlTransactionHistory" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl  tbl-50p" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlHydrationTitleHistory"> Transaction History</h4>
+                <button type="button" class="close" id="btnUpClosedMdlHistory" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row ">
+                    <div class="col-sm-6">
+                        <div class="panel panel-inverse">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">After Finished Cycle</h4>
+                            </div>
+                            <div class="panel-body">
+                                <div class="hljs-wrapper">
+                                    <table id="tblAfterCycleHistory" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="panel panel-inverse">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Hourly Checking</h4>
+                            </div>
+                            <div class="panel-body">
+                                <div class="hljs-wrapper">
+                                    <table id="tblHourlyCheckingHistory" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container" id="Drawtable">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" id="btnCancelHydrationHistory"><span class="fa fa-times"></span> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    @Scripts.Render("~/HydrationProcess-JS")
+}

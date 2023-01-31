@@ -1,0 +1,1270 @@
+﻿
+
+(function () {
+    const DailyTargetActual = function () {
+        return new DailyTargetActual.init();
+    }
+    DailyTargetActual.init = function () {
+        $D.init.call(this);
+        this.$tblDailyTarget = "";
+        this.$TabValidation = "machine";
+        this.$DynamicColumn = [];
+        this.$DailyCondition = "";
+        this.CounterList = 0;
+        this.WeeklyTargetList = [];
+        this.GraphWeeklyTarget = [];
+        this.WeeklyValidation = "none";
+        this.GenerateWeeklyListData = [];
+        this.GenerateWeeklyListDataValue = [];
+        this.GenerateWeeklyHeaderListValue = [];
+        this.GenerateMainList = [];
+    };
+    DailyTargetActual.prototype = {
+        saveMachineTarget: function (MachineTargetList) {
+            var self = this;
+            self.jsonData = { MachineTargetList: MachineTargetList };
+            self.formAction = '/Transaction/DailyTargetVsActual/SaveMachineTarget';
+            self.sendData().then(function () {
+                self.formData = $('#frmFilterDailyTarget').serializeArray();
+                self.setJsonData();
+                self.$tblDailyTarget.ajax.reload(null, false);
+                self.cancelMachineTargetTbl();
+                self.cancelMachineTargetForm();
+            });
+            return this;
+        },
+        drawDatatables: function () {
+            var self = this;
+            if (!$.fn.DataTable.isDataTable('#tblDailyTarget')) {
+                self.$tblDailyTarget = $('#tblDailyTarget').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    "searching": false,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 1000,
+                    "ajax": {
+                        "url": "/Transaction/DailyTargetVsActual/GetMachineTargetList",
+                        "type": "POST",
+                        "data": function (d) {
+                            d.FilterData = self.jsonData;
+                            d.TabValidation = self.$TabValidation;
+                            d.DailyCondition = self.$DailyCondition;
+                        },
+                        "datatype": "json",
+
+                    },
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        {
+                            title: "Target Date", data: "TargetDate", className: "MachineDataValid",
+                        },
+                        {
+                            title: "Date", data: "TargetDate", className: "DailyDataValid",
+                        },
+                        {
+                            title: "Target", data: "TargetQty", className: "DailyDataValid", render: function (data) {
+                                return parseInt(data)
+                            }
+                        },
+                        {
+                            title: "Machine ID", className: "MachineDataValid", data: "MachineIDValue"
+                        },
+                        {
+                            title: "Actual", className: "DailyDataValid", data: "ActualQty", render: function (data) {
+                                return parseInt(data)
+                            }
+                        },
+                        {
+                            title: "Fe Cl", className: "DailyDataValid", data: "FECLQty", render: function (data) {
+                                return parseInt(data)
+                            }
+                        },
+                        {
+                            title: "Drum Input", className: "DailyDataValid", data: "DrumQty", render: function (data) {
+                                return parseInt(data)
+                            }
+                        },
+                        {
+                            title: "No. of Cycle", className: "DailyDataValid", data: "NoCycleQty", render: function (data) {
+                                return parseInt(data)
+                            }
+                        },
+                        {
+                            title: "Target Qty", data: "TargetQty", className: "MachineDataValid", render: function (data) {
+                                return parseInt(data)
+                            }
+                        },
+                        {
+                            title: "Machine ID", visible: false, data: "MachineName"
+                        },
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                });
+            }
+            return this;
+        },
+        cancelMachineTargetForm: function () {
+            var self = this;
+            self.clearFromData("frmDailyTarget");
+            $("#btnSaveDailyTarget .btnLabel").text(" Save");
+            $("#mdlDailyTargetTitle").text(" Create Machine Target");
+            $("#mdlDailyTarget").modal("hide");
+            $("#DailyTargetID").val(0);
+            return this;
+        },
+        cancelMachineTargetTbl: function () {
+            var self = this;
+            $('#btnDeleteMachineTarget').attr("disabled", "disabled");
+            return this;
+        },
+        deleteMachineTarget: function () {
+            var self = this;
+            self.machinetargetID = self.$tblDailyTarget.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/Transaction/DailyTargetVsActual/DeleteMachineTarget';
+            self.jsonData = { ID: self.machinetargetID };
+            self.sendData().then(function () {
+                self.formData = $('#frmFilterDailyTarget').serializeArray();
+                self.setJsonData();
+                self.$tblDailyTarget.ajax.reload(null, false);
+                self.cancelMachineTargetTbl();
+                self.cancelMachineTargetForm();
+            });
+            return this;
+        },
+        drawDailyTargetData: function (dailylist) {
+            var self = this;
+            $("#DailyTargetList").remove();
+            if (dailylist.length === 0) {
+                self.showError("No Data Found. Please select other Date");
+            }
+            else {
+                var vhtml = "";
+                var arrMachineID = "";
+                var arrOuterMachineCounter = 0;
+                var arrInnerMachineCounter = 0;
+                var arrMachineTempData = [];
+                var DateFrom = $("#FilterFromDate").val();
+                var DateTo = $("#FilterToDate").val();
+                var currentDate = new Date(DateFrom);
+                var toDate = new Date(DateTo);
+                var ListofDate = [];
+                self.GenerateWeeklyListData = [];
+                self.GenerateWeeklyListDataValue = [];
+                self.GenerateWeeklyHeaderListValue = [];
+                for (var i = 0; i < dailylist.length; i++) {
+                    var datafound = arrMachineTempData.findIndex(x => x.MachineName === dailylist[arrOuterMachineCounter].MachineName);
+                    if (datafound === -1) {
+                        arrMachineTempData.push({ "MachineName": dailylist[arrOuterMachineCounter].MachineName });
+                    }
+                    arrOuterMachineCounter++;
+                }
+                //Sort Array Data
+                arrMachineTempData.sort(function (a, b) {
+                    var a1 = a.MachineName, b1 = b.MachineName;
+                    if (a1 == b1) return 0;
+                    return a1 > b1 ? 1 : -1;
+                });
+
+                //Get List of Date Selected 
+                while (currentDate <= toDate) {
+                    var validCurrentDate = currentDate.getFullYear() + '-' + ((currentDate.getMonth() > 8) ? (currentDate.getMonth() + 1) : ('0' + (currentDate.getMonth() + 1))) + '-' + ((currentDate.getDate() > 9) ? currentDate.getDate() : ('0' + currentDate.getDate()))
+                    ListofDate.push({ "TargetDate": validCurrentDate });
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                vhtml += "<table class='table table-bordered  table-striped' id='DailyTargetList'>";
+                vhtml += "<tr>";
+                vhtml += "<th rowspan='2' class='HeaderTitle'>Date</th>";
+                var headerCounter = 0;
+                for (var bi = 0; bi < arrMachineTempData.length; bi++) {
+                    vhtml += "<th colspan='5' class='HeaderTitle'>" + arrMachineTempData[headerCounter].MachineName + "</th>";
+                    self.GenerateWeeklyHeaderListValue.push({ "MixerName": arrMachineTempData[headerCounter].MachineName });
+                    headerCounter++;
+                }
+                vhtml += "</tr>";
+
+                //Draw Header
+                vhtml += "<tr>";
+                for (var hi = 0; hi < arrMachineTempData.length; hi++) {
+                    vhtml += "<td class='HeaderSTitle'>Target</td>";
+                    vhtml += "<td class='HeaderSTitle'>Actual</td>";
+                    vhtml += "<td class='HeaderSTitle'>No of Cycle</td>";
+                }
+                vhtml += "</tr>";
+                //Draw Body
+                var dateCounter = 0;
+                var dateListCounters = 0;
+                var mixerListCounter = 0;
+                var isfound = false
+                for (var i = 0; i < ListofDate.length; i++) {
+                    vhtml += "<tr>";
+                    vhtml += "<td>" + ListofDate[dateCounter].TargetDate + "</td>";
+                    dateListCounters = 0;
+                    mixerListCounter = 0;
+                    for (var bm = 0; bm < arrMachineTempData.length; bm++) {
+                        dateListCounters = 0;
+                        for (var mi = 0; mi < dailylist.length; mi++) {
+                            if (arrMachineTempData[mixerListCounter].MachineName === dailylist[dateListCounters].MachineName) {
+                                if (ListofDate[dateCounter].TargetDate === dailylist[dateListCounters].TargetDate) {
+                                    vhtml += "<td>" + dailylist[dateListCounters].TargetQty + "</td>";
+                                    vhtml += "<td>" + dailylist[dateListCounters].ActualQty + "</td>";
+                                    vhtml += "<td>" + dailylist[dateListCounters].NoCycleQty + "</td>";
+                                    //Stored in List
+                                    self.GenerateWeeklyListDataValue.push({ "Date": ListofDate[dateCounter].TargetDate, "Target": dailylist[dateListCounters].TargetQty, "Actual": dailylist[dateListCounters].ActualQty, "Achievement": dailylist[dateListCounters].NoCycleQty, "MixerName": dailylist[dateListCounters].MachineName })
+                                    isfound = true
+                                }
+                            }
+                            dateListCounters++;
+                        }
+                        if (!isfound) {
+                            vhtml += "<td>0</td>";
+                            vhtml += "<td>0</td>";
+                            vhtml += "<td>0</td>";
+                        }
+                        isfound = false;
+                        mixerListCounter++;
+                    }
+
+                    vhtml += "</tr>";
+                    dateCounter++;
+                }
+                vhtml += "</table>";
+                $("#DailyTargetData").append(vhtml);
+            }
+            return this;
+        },
+        drawMonthlyTargetData: function (monthlylist) {
+            var self = this;
+            $("#DailyTargetList").remove();
+            $("#stacked-chart").remove();
+            $("#nv-stacked-bar-chart").remove();
+            if (monthlylist.length === 0) {
+                self.showError("No Data Found. Please select other Date");
+            }
+            else {
+                var vhtml = "";
+                var arrMachineID = "";
+                var arrOuterMachineCounter = 0;
+                var arrInnerMachineCounter = 0;
+                var dateCounter = 0;
+                var dateListCounters = 0;
+                var mixerListCounter = 0;
+                var isfound = false;
+                var arrMachineTempData = [];
+                var arrGraph = [];
+                var arrOuterGraph = [];
+                var ActualQtyData = 0;
+                var TargetQtyData = 0;
+                var validArr = 0;
+                var monthNames = ["Jan", "Feb", "March", "Apr", "May", "June",
+                    "July", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+                var arrStackData = [];
+                var arrFStackData = [];
+                var stackcounter = 0;
+                var DateFrom = $("#FilterFromDate").val() + "-01";
+                var DateTo = $("#FilterToDate").val() + "-01";
+                var currentDate = new Date(DateFrom);
+                var toDate = new Date(DateTo);
+                var currentMonth = currentDate.getMonth();
+                var toMonth = toDate.getMonth();
+                var getCurrentYear = parseInt(currentDate.getFullYear().toString().substr(-2));
+                var getToYear = parseInt(toDate.getFullYear().toString().substr(-2));
+                var ListofDate = [];
+                self.GenerateWeeklyListData = [];
+                self.GenerateWeeklyListDataValue = [];
+                self.GenerateWeeklyHeaderListValue = [];
+                for (var i = 0; i < monthlylist.length; i++) {
+                    var datafound = arrMachineTempData.findIndex(x => x.MachineName === monthlylist[arrOuterMachineCounter].MachineName);
+                    if (datafound === -1) {
+                        arrMachineTempData.push({ "MachineName": monthlylist[arrOuterMachineCounter].MachineName });
+                    }
+                    arrOuterMachineCounter++;
+                }
+                //Sort Array Data
+                arrMachineTempData.sort(function (a, b) {
+                    var a1 = a.MachineName, b1 = b.MachineName;
+                    if (a1 == b1) return 0;
+                    return a1 > b1 ? 1 : -1;
+                });
+                if (getCurrentYear === getToYear) {
+                    while (currentMonth <= toMonth) {
+                        if (currentMonth === 12) {
+                            var validCurrentDate = monthNames[0] + "-" + currentDate.getFullYear().toString().substr(-2)
+                        }
+                        else {
+                            var validCurrentDate = monthNames[currentMonth] + "-" + currentDate.getFullYear().toString().substr(-2)
+                        }
+
+                        ListofDate.push({ "TargetDate": validCurrentDate });
+                        currentMonth++;
+                    }
+                }
+                else {
+                    var CounterMoreMonth = 0;
+                    while (getCurrentYear <= getToYear) {
+
+                        if (getCurrentYear === getToYear) {
+                            var monthrow = 1;
+                            var arrmonthrow = 0;
+                            while (monthrow <= toMonth) {
+                                if (monthrow === 12) {
+                                    var validCurrentDate = monthNames[0] + "-" + (getCurrentYear + 1)
+                                }
+                                else {
+                                    var validCurrentDate = monthNames[monthrow] + "-" + getCurrentYear
+                                }
+
+                                ListofDate.push({ "TargetDate": validCurrentDate });
+                                monthrow++;
+                                arrmonthrow++;
+                            }
+
+                        }
+                        else {
+                            if (CounterMoreMonth === 0) {
+                                while (currentMonth <= 12) {
+                                    if (currentMonth === 12) {
+                                        var validCurrentDate = monthNames[0] + "-" + (getCurrentYear + 1)
+                                    }
+                                    else {
+                                        var validCurrentDate = monthNames[currentMonth] + "-" + getCurrentYear
+                                    }
+
+                                    ListofDate.push({ "TargetDate": validCurrentDate });
+                                    currentMonth++;
+                                }
+                            }
+                            else {
+                                var MoreMC = 1;
+                                while (MoreMC <= 12) {
+                                    if (MoreMC === 12) {
+                                        var validCurrentDate = monthNames[0] + "-" + (getCurrentYear + 1)
+                                    }
+                                    else {
+                                        var validCurrentDate = monthNames[MoreMC] + "-" + getCurrentYear
+                                    }
+
+                                    ListofDate.push({ "TargetDate": validCurrentDate });
+                                    MoreMC++;
+                                }
+
+                            }
+
+                        }
+                        getCurrentYear++;
+                        CounterMoreMonth++;
+                    }
+                }
+
+                console.log(ListofDate)
+                vhtml += "<table class='table table-bordered  table-striped' id='DailyTargetList'>";
+                vhtml += "<tr>";
+                vhtml += "<th  class='HeaderTitle'>Date</th>";
+                var headerCounter = 0;
+                for (var bi = 0; bi < arrMachineTempData.length; bi++) {
+                    vhtml += "<th  class='HeaderTitle'>" + arrMachineTempData[headerCounter].MachineName + "</th>";
+                    self.GenerateWeeklyHeaderListValue.push({ "MixerName": arrMachineTempData[headerCounter].MachineName });
+                    headerCounter++;
+                }
+                vhtml += "<th  class='HeaderTitle'>Target</th>";
+                vhtml += "<th  class='HeaderTitle'>Achievement</th>";
+                vhtml += "<th  class='HeaderTitle'>Actual</th>";
+                vhtml += "</tr>";
+
+                //Draw Header
+                for (var i = 0; i < ListofDate.length; i++) {
+                    vhtml += "<tr>";
+                    vhtml += "<td>" + ListofDate[dateCounter].TargetDate + "</td>";
+                    dateListCounters = 0;
+                    mixerListCounter = 0;
+                    TargetQtyData = 0;
+                    arrStackData = [];
+                    for (var bm = 0; bm < arrMachineTempData.length; bm++) {
+                        dateListCounters = 0;
+                        for (var mi = 0; mi < monthlylist.length; mi++) {
+                            if (arrMachineTempData[mixerListCounter].MachineName === monthlylist[dateListCounters].MachineName) {
+                                if (ListofDate[dateCounter].TargetDate === monthlylist[dateListCounters].TargetDate) {
+                                    vhtml += "<td>" + monthlylist[dateListCounters].TargetQty + "</td>";
+                                    TargetQtyData += monthlylist[dateListCounters].TargetQty;
+                                    arrOuterGraph.push({ "TargetDate": ListofDate[dateCounter].TargetDate, "MixerQty": monthlylist[dateListCounters].TargetQty, "MachineName": arrMachineTempData[mixerListCounter].MachineName })
+                                    isfound = true;
+                                    arrStackData.push([ListofDate[dateCounter].TargetDate, monthlylist[dateListCounters].TargetQty]);
+                                    self.GenerateWeeklyListDataValue.push({ "Date": ListofDate[dateCounter].TargetDate, "MixerData": monthlylist[dateListCounters].TargetQty, "MixerName": arrMachineTempData[mixerListCounter].MachineName })
+                                }
+                            }
+                            dateListCounters++;
+                        }
+                        if (isfound === false) {
+                            arrOuterGraph.push({ "TargetDate": ListofDate[dateCounter].TargetDate, "MixerQty": 0, "MachineName": arrMachineTempData[mixerListCounter].MachineName });
+                            if (validArr === 0) {
+                                if (ListofDate[dateCounter].TargetDate === "Dec-20") {
+                                    arrOuterGraph.push({ "TargetDate": ListofDate[dateCounter].TargetDate, "MixerQty": 0, "MachineName": arrMachineTempData[mixerListCounter].MachineName });
+                                    //  arrStackData.push([ListofDate[dateCounter].TargetDate, 0]);
+                                    //   vhtml += "<td>0</td>";
+                                    validArr++;
+                                }
+                            }
+                            vhtml += "<td>0</td>";
+                            self.GenerateWeeklyListDataValue.push({ "Date": ListofDate[dateCounter].TargetDate, "MixerData": 0, "MixerName": arrMachineTempData[mixerListCounter].MachineName })
+                            arrStackData.push([ListofDate[dateCounter].TargetDate, 0]);
+                        }
+                        else {
+                            isfound = false;
+                        }
+                        mixerListCounter++;
+                    }
+                    stackcounter++;
+                    arrFStackData.push(arrStackData);
+
+                    dateListCounters = 0;
+                    mixerListCounter = 0;
+                    ActualQtyData = 0;
+                    for (var mig = 0; mig < monthlylist.length; mig++) {
+                        if (ListofDate[dateCounter].TargetDate === monthlylist[dateListCounters].TargetDate) {
+                            ActualQtyData += monthlylist[dateListCounters].ActualQty;
+                        }
+                        dateListCounters++;
+                    }
+                    var FinalData = 0;
+                    if (ActualQtyData === 0) {
+                        FinalData = 0;
+                    }
+                    else {
+                        FinalData = parseFloat(TargetQtyData).toFixed(2) / ActualQtyData;
+                    }
+
+                    vhtml += "<td>" + ActualQtyData + "</td>";
+                    vhtml += "<td>" + parseFloat(FinalData).toFixed(2) + "%" + "</td>";
+                    vhtml += "<td>" + parseFloat(TargetQtyData).toFixed(2) + "</td>";
+                    arrGraph.push({ "TargetDate": ListofDate[dateCounter].TargetDate, "TargetQty": ActualQtyData, "Achievement": parseFloat(FinalData).toFixed(2) + "%", "ActualQty": parseFloat(TargetQtyData).toFixed(2) })
+
+                    vhtml += "</tr>";
+                    self.GenerateWeeklyListData.push({
+                        "Date": ListofDate[dateCounter].TargetDate, "MixerData": ActualQtyData, "Target": parseFloat(ActualQtyData).toFixed(2), "Achievement": parseFloat(FinalData).toFixed(2) + "%", "Actual": parseFloat(TargetQtyData).toFixed(2)
+                    })
+
+                    dateCounter++;
+                }
+
+                vhtml += "</table><div id='nv-stacked-bar-chart' class='height-sm'></div>";
+                $("#DailyTargetData").append(vhtml);
+                self.monthlyStackedChart(ListofDate, arrGraph, arrFStackData, arrMachineTempData);
+            }
+            return this;
+        },
+        datepickerValidation: function () {
+            var self = this;
+            var dateFormat = "";
+            $("#FilterFromDate,#FilterToDate").datepicker("destroy");
+            if (self.$TabValidation === "machine") {
+                dateFormat = {
+                    todayHighlight: true,
+                    autoclose: true,
+                    format: "yyyy-mm-dd"
+                };
+            }
+            else if (self.$TabValidation === "daily") {
+                dateFormat = {
+                    todayHighlight: true,
+                    autoclose: true,
+                    format: "yyyy-mm-dd"
+                };
+            }
+            else if (self.$TabValidation === "monthly") {
+                dateFormat = {
+                    todayHighlight: true,
+                    autoclose: true,
+                    format: "yyyy-mm",
+                    viewMode: "months",
+                    minViewMode: "months"
+                };
+            }
+            $("#FilterFromDate,#FilterToDate").datepicker(dateFormat);
+            return this;
+        },
+        monthlyStackedChart: function (ListofDate, monthlylist, arrFStackData, arrMachineTempData) {
+            var self = this;
+            var MainCounter = 0;
+            var MainInnerCounter = 0;
+            var mixerCounter = 0;
+            var arrMain = [];
+            var arrInnerMain = [];
+            var ArrOuterMain = [];
+            var ArrData = "";
+            var arrcolor = [COLOR_BLUE_LIGHTER, COLOR_AQUA_LIGHTER, COLOR_GREEN_LIGHTER, COLOR_YELLOW_LIGHTER, COLOR_ORANGE_LIGHTER, COLOR_PURPLE_LIGHTER, COLOR_RED_LIGHTER, COLOR_GREY_LIGHTER, COLOR_SILVER_LIGHTER, COLOR_BLACK_LIGHTER]
+            for (var mai = 0; mai < arrMachineTempData.length; mai++) {
+                MainInnerCounter = 0;
+                arrInnerMain = [];
+                for (var inner = 0; inner < arrFStackData.length; inner++) {
+                    if (arrFStackData[MainInnerCounter][MainCounter] != undefined) {
+                        ArrData = arrFStackData[MainInnerCounter][MainCounter];
+                        arrInnerMain.push({ x: ArrData[0], y: ArrData[1] });
+                    }
+                    MainInnerCounter++;
+                }
+                arrMain.push({
+                    key: arrMachineTempData[MainCounter].MachineName, 'color': arrcolor[mixerCounter], values: arrInnerMain
+                });
+                if (mixerCounter === 9) {
+                    mixerCounter = 0;
+                }
+                MainCounter++;
+                mixerCounter++;
+            }
+            ArrOuterMain.push(arrMain);
+            nv.addGraph({
+                generate: function () {
+                    var stackedBarChart = nv.models.multiBarChart()
+                        .stacked(true)
+                        .showControls(false);
+
+                    var svg = d3.select('#nv-stacked-bar-chart').append('svg').datum(ArrOuterMain[0]);
+                    svg.transition().duration(0).call(stackedBarChart);
+                    return stackedBarChart;
+                }
+            });
+            return this;
+        },
+        resetDataPanel: function () {
+            var self = this;
+            if (self.$TabValidation === "machine") {
+                $("#tbldata").show();
+                $("#DateFilter").show();
+                $("#FilterMachineID").removeAttr("multiple");
+                $('#FilterMachineID').select2('destroy');
+                $("#WeeklyBtnSetting").attr("hidden", true);
+            }
+            else if (self.$TabValidation === "weekly") {
+                $("#tbldata").hide();
+                $("#DateFilter").hide();
+                $("#FilterMachineID").attr("multiple", "multiple");
+                $('#FilterMachineID').select2('destroy');
+                $("#WeeklyBtnSetting").removeAttr("hidden");
+            }
+            else {
+                $("#tbldata").hide();
+                $("#DateFilter").show();
+                $("#FilterMachineID").attr("multiple", "multiple");
+                $('#FilterMachineID').select2('destroy');
+                $("#WeeklyBtnSetting").attr("hidden", true);
+            }
+            self.clearFromData("frmFilterDailyTarget");
+            $('#FilterMachineID').select2({
+                ajax: {
+                    url: "/General/MySQLGetSelect2Data",
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            id: 'ID',
+                            text: "MachineName",
+                            table: 'mMachine',
+                            db: 'SHIN-ETSU-MYSQL',
+                            condition: ' AND IsDeleted=0 ',
+                            display: 'id&text',
+                        };
+                    },
+                },
+                placeholder: '--Please Select Machine ID--',
+            });
+            $("#DailyTargetList").remove();
+
+            $("#stacked-chart").remove();
+            $("#nv-stacked-bar-chart").remove();
+            self.WeeklyValidation = "none";
+            if (self.$TabValidation === "machine") {
+                self.formData = $('#frmFilterDailyTarget').serializeArray();
+                self.setJsonData();
+                self.$tblDailyTarget.ajax.reload(null, false);
+            }
+            return this;
+        },
+        drawWeeklyList: function () {
+            var self = this;
+            var vhtml = "";
+            vhtml += "<div class='WeeklySettingData' id='WeeklySeetingHeader" + self.CounterList + "'>" +
+                "<div class='row '>" +
+                " <div class='col-sm-12'>" +
+                "  <div class='input-group input-group-sm m-b-5'>" +
+                "<div class='input-group-prepend'>" +
+                "<label class='input-group-text' style='width:92px;' for='GroupCount'>Group Count <span class='text-danger'></span></label>" +
+                "</div>" +
+                "<input type='text' id='GroupCount" + self.CounterList + "'   name='GroupCount' class='form-control GroupCount NewGroupCount' value='1' readonly data-parsley-maxlength='50' autocomplete='off' data-parsley-errors-container='#err-GroupCount'>" +
+                "</div>" +
+                "<div id='err-GroupCount'></div>" +
+                "</div>" +
+                "</div>" +
+                "<div class='row '>" +
+                "<div class='col-sm-6'>" +
+                "<div class='input-group input-group-sm m-b-5'>" +
+                "<div class='input-group-prepend'>" +
+                "<label class='input-group-text' style='width:92px;' for='WeeklySettingFrom'>Date From <span class='text-danger'>*</span></label>" +
+                "</div>" +
+                "<input type='text' id='WeeklySettingFrom" + self.CounterList + "' name='WeeklySettingFrom" + self.CounterList + "' class='form-control WeeklySettingFrom NewWeeklySettingFrom' data-parsley-maxlength='50' required autocomplete='off' data-parsley-errors-container='#err-WeeklySettingFrom" + self.CounterList + "'>" +
+                "</div>" +
+                "<div id='err-WeeklySettingFrom" + self.CounterList + "'></div>" +
+                "</div>" +
+                "<div class='col-sm-6'>" +
+                "<div class='input-group input-group-sm m-b-5'>" +
+                "<div class='input-group-prepend'>" +
+                "<label class='input-group-text' style='width:92px;' for='WeeklySettingTo'>Date To <span class='text-danger'>*</span></label>" +
+                " </div>" +
+                " <input type='text' id='WeeklySettingTo" + self.CounterList + "' name='WeeklySettingTo" + self.CounterList + "' class='form-control WeeklySettingTo NewWeeklySettingTo' data-parsley-maxlength='50' required autocomplete='off' data-parsley-errors-container='#err-WeeklySettingTo" + self.CounterList + "'>" +
+
+                "</div>" +
+                "<div id='err-WeeklySettingTo" + self.CounterList + "'></div>" +
+                "<span class='input-group-append'>" +
+                "  <button type='button' class='btn btn-sm btn-danger btn-block btnMinusID'  data-id=" + self.CounterList + " id='btnMinusID" + self.CounterList + "'' data-rowid='" + self.CounterList + "'><span class='fa fa-trash'></span><span class='btnLabel'> Delete</span></button>" +
+                "</span>" +
+                "</div>" +
+                " </div>" +
+                "</div>";
+            self.CounterList++;
+            $("#WeeklySettingListContainer").append(vhtml);
+            self.validateWeeklyDate();
+            self.validateGroupCount();
+            return this;
+        },
+        validateWeeklyDate: function () {
+            var self = this;
+            $(".WeeklySettingFrom,.WeeklySettingTo").datepicker({
+                todayHighlight: true,
+                autoclose: true,
+                format: "yyyy-mm-dd"
+            });
+            return this;
+        },
+        validateGroupCount: function () {
+            var self = this;
+            var GroupCounter = 2;
+            $(".GroupCount").each(function () {
+                var selfinner = this.id;
+                $("#" + selfinner).val(GroupCounter);
+                GroupCounter++;
+            });
+            return this;
+        },
+        removeRow: function (WeeklyID) {
+            var self = this;
+            $("#WeeklySeetingHeader" + WeeklyID).remove();
+            $("#err-WeeklySettingFrom" + WeeklyID).remove();
+            $("#err-WeeklySettingTo" + WeeklyID).remove();
+            self.validateGroupCount();
+            return this;
+        },
+        saveWeeklySetting: function () {
+            var self = this;
+
+            var DateFromList = $('.NewWeeklySettingFrom').map((_, el) => el.value).get();
+            var DatetoList = $('.NewWeeklySettingTo').map((_, el) => el.value).get();
+            var GroupCount = $('.NewGroupCount').map((_, el) => el.value).get();
+            var dateCounter = 0;
+            self.WeeklyTargetList = [];
+            for (var i = 0; i < DateFromList.length; i++) {
+                self.WeeklyTargetList.push({ GroupCountData: parseInt(GroupCount[dateCounter]), DateFrom: DateFromList[dateCounter], DateTo: DatetoList[dateCounter] });
+                dateCounter++;
+            }
+            self.jsonData = { WeeklyData: self.WeeklyTargetList };
+            self.formAction = '/Transaction/DailyTargetVsActual/SaveWeeklyList';
+            self.sendData().then(function () {
+                self.ResetWeeklySetting();
+            });
+            return this;
+        },
+        ResetWeeklySetting: function () {
+            var self = this;
+            self.WeeklyTargetList = [];
+            $(".WeeklySettingData").remove();
+            self.clearFromData("frmWeeklySetting");
+            $("#mdlSetupWeeklySetting").modal('hide');
+            $("#GroupCount").attr("readonly", true);
+            $("#GroupCount").val(1);
+            return this;
+        },
+        getWeeklyList: function () {
+            var self = this;
+            self.formAction = '/Transaction/DailyTargetVsActual/GetWeeklySettingList';
+            self.sendData().then(function () {
+                if (self.responseData.weeklyDetails.length === 0) {
+                    $("#mdlSetupWeeklySetting").modal('show');
+                }
+                else {
+                    self.populateWeeklyData(self.responseData.weeklyDetails);
+                }
+            });
+            return this;
+        },
+        populateWeeklyData: function (weeklylist) {
+            var self = this;
+            var InnerCounter = 0;
+            var vhtml = "";
+            for (var i = 0; i < weeklylist.length; i++) {
+                if (InnerCounter === 0) {
+                    $("#GroupCount").val(weeklylist[InnerCounter].GrountCount);
+                    $("#WeeklySettingFrom").val(weeklylist[InnerCounter].DateFrom);
+                    $("#WeeklySettingTo").val(weeklylist[InnerCounter].DateTo);
+                }
+                else {
+                    vhtml += "<div class='WeeklySettingData' id='WeeklySeetingHeader" + self.CounterList + "'>" +
+                        "<div class='row '>" +
+                        " <div class='col-sm-12'>" +
+                        "  <div class='input-group input-group-sm m-b-5'>" +
+                        "<div class='input-group-prepend'>" +
+                        "<label class='input-group-text' style='width:92px;' for='GroupCount'>Group Count <span class='text-danger'></span></label>" +
+                        "</div>" +
+                        "<input type='text' id='GroupCount" + self.CounterList + "' value='" + weeklylist[InnerCounter].GrountCount + "'   name='GroupCount' class='form-control GroupCount NewGroupCount' value='1' readonly data-parsley-maxlength='50' autocomplete='off' data-parsley-errors-container='#err-GroupCount'>" +
+                        "</div>" +
+                        "<div id='err-GroupCount'></div>" +
+                        "</div>" +
+                        "</div>" +
+                        "<div class='row '>" +
+                        "<div class='col-sm-6'>" +
+                        "<div class='input-group input-group-sm m-b-5'>" +
+                        "<div class='input-group-prepend'>" +
+                        "<label class='input-group-text' style='width:92px;' for='WeeklySettingFrom'>Date From <span class='text-danger'>*</span></label>" +
+                        "</div>" +
+                        "<input type='text' id='WeeklySettingFrom" + self.CounterList + "' value='" + weeklylist[InnerCounter].DateFrom + "'  name='WeeklySettingFrom" + self.CounterList + "' class='form-control WeeklySettingFrom NewWeeklySettingFrom' data-parsley-maxlength='50' required autocomplete='off' data-parsley-errors-container='#err-WeeklySettingFrom" + self.CounterList + "'>" +
+                        "</div>" +
+                        "<div id='err-WeeklySettingFrom" + self.CounterList + "'></div>" +
+                        "</div>" +
+                        "<div class='col-sm-6'>" +
+                        "<div class='input-group input-group-sm m-b-5'>" +
+                        "<div class='input-group-prepend'>" +
+                        "<label class='input-group-text' style='width:92px;' for='WeeklySettingTo'>Date To <span class='text-danger'>*</span></label>" +
+                        " </div>" +
+                        " <input type='text' id='WeeklySettingTo" + self.CounterList + "' value='" + weeklylist[InnerCounter].DateTo + "' name='WeeklySettingTo" + self.CounterList + "' class='form-control WeeklySettingTo NewWeeklySettingTo' data-parsley-maxlength='50' required autocomplete='off' data-parsley-errors-container='#err-WeeklySettingTo" + self.CounterList + "'>" +
+
+                        "</div>" +
+                        "<div id='err-WeeklySettingTo" + self.CounterList + "'></div>" +
+                        "<span class='input-group-append'>" +
+                        "  <button type='button' class='btn btn-sm btn-danger btn-block btnMinusID'  data-id=" + self.CounterList + " id='btnMinusID" + self.CounterList + "'' data-rowid='" + self.CounterList + "'><span class='fa fa-trash'></span><span class='btnLabel'> Delete</span></button>" +
+                        "</span>" +
+                        "</div>" +
+                        " </div>" +
+                        "</div>";
+                }
+                InnerCounter++;
+                self.CounterList++;
+            }
+            $("#WeeklySettingListContainer").append(vhtml);
+            self.validateWeeklyDate();
+            $("#mdlSetupWeeklySetting").modal('show');
+            return this;
+        },
+        drawWeeklyTargetData: function () {
+            var self = this;
+            self.formAction = '/Transaction/DailyTargetVsActual/GetWeeklySettingList';
+            self.sendData().then(function () {
+                if (self.responseData.weeklyDetails.length === 0) {
+                    self.showError("No Weekly Setting");
+                }
+                else {
+                    var WeeklyDateList = self.GraphWeeklyTarget;
+                    self.drawTableWeeklyList(WeeklyDateList, self.responseData.weeklyDetails)
+                }
+            });
+
+            return this;
+        },
+        drawTableWeeklyList: function (WeeklyList, WeeklyListData) {
+            var self = this;
+            $("#DailyTargetList").remove();
+            $("#stacked-chart").remove();
+            $("#nv-stacked-bar-chart").remove();
+
+            if (self.$DailyCondition === "0") {
+                self.showError("No Data Found. Please select other Date");
+            }
+            else {
+                var vhtml = "";
+                var arrOuterMachineCounter = 0;
+                var arrMachineTempData = [];
+                var headerCounter = 0;
+                var dateCounter = 0;
+                var currentDateFrom = "";
+                var currentDateTo = "";
+                var ListofDate = [];
+                var arrListofDate = [];
+                var TotalData = 0;
+                var InnerCounter = 0;
+                var OuterCounter = 0;
+                var MachineInnerCounter = 0;
+                var TotalTarget = 0;
+                var TempTotalTarget = 0;
+                var TotalActual = 0;
+                var TotalAchievement = 0;
+                var ArrTempWeeklyList = [];
+                var ArrWeeklyList = [];
+                self.GenerateWeeklyListData = [];
+                self.GenerateWeeklyListDataValue = [];
+                self.GenerateWeeklyHeaderListValue = [];
+                for (var i = 0; i < WeeklyList[0].length; i++) {
+                    var datafound = arrMachineTempData.findIndex(x => x.MachineName === WeeklyList[0][arrOuterMachineCounter].MachineName);
+                    if (datafound === -1) {
+                        arrMachineTempData.push({ "MachineName": WeeklyList[0][arrOuterMachineCounter].MachineName });
+                    }
+                    arrOuterMachineCounter++;
+                }
+                //Sort Array Data
+                arrMachineTempData.sort(function (a, b) {
+                    var a1 = a.MachineName, b1 = b.MachineName;
+                    if (a1 == b1) return 0;
+                    return a1 > b1 ? 1 : -1;
+                });
+
+                vhtml += "<table class='table table-bordered  table-striped' id='DailyTargetList'>";
+                vhtml += "<tr>";
+                vhtml += "<th  class='HeaderTitle'>Date</th>";
+                for (var bi = 0; bi < arrMachineTempData.length; bi++) {
+
+                    vhtml += "<th  class='HeaderTitle'>" + arrMachineTempData[headerCounter].MachineName + "</th>";
+                    self.GenerateWeeklyHeaderListValue.push({ "MixerName": arrMachineTempData[headerCounter].MachineName });
+                    headerCounter++;
+                }
+                vhtml += "<th  class='HeaderTitle'>Target</th>";
+                vhtml += "<th  class='HeaderTitle'>Achievement</th>";
+                vhtml += "<th  class='HeaderTitle'>Actual</th>";
+                vhtml += "</tr>";
+                for (var i = 0; i < WeeklyListData.length; i++) {
+                    vhtml += "<tr>";
+                    vhtml += "<td>" + WeeklyListData[dateCounter].WeeklySetting + "</td>";
+                    currentDateFrom = new Date(WeeklyListData[dateCounter].DateFrom);
+                    currentDateTo = new Date(WeeklyListData[dateCounter].DateTo);
+                    ListofDate = [];
+                    MachineInnerCounter = 0;
+                    TotalActual = 0;
+                    TotalTarget = 0;
+                    TotalAchievement = 0;
+                    ArrTempWeeklyList = [];
+                    while (currentDateFrom <= currentDateTo) {
+                        var validCurrentDate = currentDateFrom.getFullYear() + '-' + ((currentDateFrom.getMonth() > 8) ? (currentDateFrom.getMonth() + 1) : ('0' + (currentDateFrom.getMonth() + 1))) + '-' + ((currentDateFrom.getDate() > 9) ? currentDateFrom.getDate() : ('0' + currentDateFrom.getDate()))
+                        ListofDate.push({ "TargetDate": validCurrentDate });
+                        currentDateFrom.setDate(currentDateFrom.getDate() + 1);
+                    }
+                    //List of Machine
+                    for (var ji = 0; ji < arrMachineTempData.length; ji++) {
+                        InnerCounter = 0;
+                        TotalData = 0;
+                        TempTotalTarget = 0;
+                        //List of Row Week
+                        for (var gi = 0; gi < ListofDate.length; gi++) {
+                            OuterCounter = 0;
+                            //List of Week Data 
+                            for (var vi = 0; vi < WeeklyList[0].length; vi++) {
+                                if (arrMachineTempData[MachineInnerCounter].MachineName === WeeklyList[0][OuterCounter].MachineName) {
+                                    if (ListofDate[InnerCounter].TargetDate === WeeklyList[0][OuterCounter].TargetDate) {
+
+                                        TotalData += WeeklyList[0][OuterCounter].TargetQty;
+                                        TempTotalTarget += WeeklyList[0][OuterCounter].ActualQty;
+                                    }
+                                    else {
+                                        TotalData += 0;
+                                        TempTotalTarget += 0;
+                                    }
+                                }
+                                else {
+                                    TotalData += 0;
+                                    TempTotalTarget += 0;
+
+                                }
+
+                                OuterCounter++;
+                            }
+                            InnerCounter++;
+                        }
+                        ArrTempWeeklyList.push([WeeklyListData[dateCounter].WeeklySetting, TotalData]);
+                        self.GenerateWeeklyListDataValue.push({ "Date": WeeklyListData[dateCounter].WeeklySetting, "MixerData": TotalData, "MixerName": arrMachineTempData[ji].MachineName })
+                        vhtml += "<td>" + TotalData + "</td>";
+                        TotalActual += TotalData;
+                        TotalTarget += TempTotalTarget;
+                        MachineInnerCounter++;
+                    }
+                    ArrWeeklyList.push(ArrTempWeeklyList);
+                    if (TotalActual === 0) {
+                        TotalAchievement = 0;
+                    }
+                    else {
+                        TotalAchievement = TotalTarget / TotalActual;
+                    }
+                    vhtml += "<td>" + TotalTarget + "</td>";
+                    vhtml += "<td>" + parseFloat(TotalAchievement).toFixed(2) + "%</td>";
+                    vhtml += "<td>" + parseFloat(TotalActual).toFixed(2) + "</td>";
+                    vhtml += "</tr>";
+                    self.GenerateWeeklyListData.push({
+                        "Date": WeeklyListData[dateCounter].WeeklySetting, "MixerData": TotalActual, "Target": TotalTarget, "Achievement": parseFloat(TotalAchievement).toFixed(2) + "%", "Actual": parseFloat(TotalActual).toFixed(2)
+                    })
+                    dateCounter++;
+                }
+
+                vhtml += "</table><div id='nv-stacked-bar-chart' class='height-sm'></div>";
+                $("#DailyTargetData").append(vhtml);
+                self.WeeklyStackedChart(ArrWeeklyList, arrMachineTempData);
+
+
+            }
+
+            return this;
+        },
+        WeeklyStackedChart: function (arrFStackData, arrMachineTempData) {
+            var self = this;
+            var MainCounter = 0;
+            var MainInnerCounter = 0;
+            var mixerCounter = 0;
+            var arrMain = [];
+            var arrInnerMain = [];
+            var ArrOuterMain = [];
+            var ArrData = "";
+            var arrcolor = [COLOR_BLUE_LIGHTER, COLOR_AQUA_LIGHTER, COLOR_GREEN_LIGHTER, COLOR_YELLOW_LIGHTER, COLOR_ORANGE_LIGHTER, COLOR_PURPLE_LIGHTER, COLOR_RED_LIGHTER, COLOR_GREY_LIGHTER, COLOR_SILVER_LIGHTER, COLOR_BLACK_LIGHTER]
+            for (var mai = 0; mai < arrMachineTempData.length; mai++) {
+                MainInnerCounter = 0;
+                arrInnerMain = [];
+                for (var inner = 0; inner < arrFStackData.length; inner++) {
+                    if (arrFStackData[MainInnerCounter][MainCounter] != undefined) {
+                        ArrData = arrFStackData[MainInnerCounter][MainCounter];
+                        arrInnerMain.push({ x: ArrData[0], y: ArrData[1] });
+                    }
+                    MainInnerCounter++;
+                }
+                arrMain.push({
+                    key: arrMachineTempData[MainCounter].MachineName, 'color': arrcolor[mixerCounter], values: arrInnerMain
+                });
+                console.log(arrMain)
+                if (mixerCounter === 9) {
+                    mixerCounter = 0;
+                }
+                MainCounter++;
+                mixerCounter++;
+
+            }
+
+            nv.addGraph({
+                generate: function () {
+                    var stackedBarChart = nv.models.multiBarChart()
+                        .stacked(true)
+                        .showControls(false);
+
+                    var svg = d3.select('#nv-stacked-bar-chart').append('svg').datum(arrMain);
+                    svg.transition().duration(0).call(stackedBarChart);
+                    return stackedBarChart;
+                }
+            });
+            return this;
+        },
+        GenerateActualDailyExcel: function () {
+            var self = this;
+
+            return this;
+        }
+    };
+    DailyTargetActual.init.prototype = $.extend(DailyTargetActual.prototype, $D.init.prototype);
+    DailyTargetActual.init.prototype = DailyTargetActual.prototype;
+    $(document).ready(function () {
+        var DailyTarget = DailyTargetActual();
+        DailyTarget.drawDatatables();
+        DailyTarget.datepickerValidation();
+        DailyTarget.formData = $('#frmFilterDailyTarget').serializeArray();
+        DailyTarget.setJsonData();
+        $("#mdlDailyTarget").on('shown.bs.modal', function () {
+            $('#MachineDataList').select2({
+                ajax: {
+                    url: "/General/MySQLGetSelect2Data",
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            id: 'ID',
+                            text: "MachineName",
+                            table: 'mMachine',
+                            db: 'SHIN-ETSU-MYSQL',
+                            condition: ' AND IsDeleted=0 ',
+                            display: 'id&text',
+                        };
+                    },
+                },
+                placeholder: '--Please Select Machine ID--',
+                sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),
+            });
+
+        });
+        $("#btnAddMachineTarget").click(function () {
+            $("#mdlDailyTarget").modal('show');
+        });
+        $("#DateTargetFrom,#DateTargetTo").datepicker({
+            todayHighlight: true,
+            autoclose: true,
+            format: "yyyy-mm-dd"
+        });
+        $("#btnSaveDailyTarget").click(function () {
+            $("#frmDailyTarget").submit();
+        });
+        $("#frmDailyTarget").submit(function (e) {
+            e.preventDefault();
+            var DateFrom = $("#DateTargetFrom").val();
+            var DateTo = $("#DateTargetTo").val();
+            var ListofDate = [];
+            var currentDate = new Date(DateFrom);
+            var toDate = new Date(DateTo);
+            var TargetQty = parseInt($("#TargetQty").val());
+            var DailyTargetList = [];
+            var MachineLength = $("#MachineDataList").val().length;
+            var MachineCounter = 0;
+            var DateCounter = 0;
+            while (currentDate <= toDate) {
+                var validCurrentDate = currentDate.getFullYear() + '-' + ((currentDate.getMonth() > 8) ? (currentDate.getMonth() + 1) : ('0' + (currentDate.getMonth() + 1))) + '-' + ((currentDate.getDate() > 9) ? currentDate.getDate() : ('0' + currentDate.getDate()))
+                ListofDate.push({ "TargetDate": validCurrentDate, "TargetQty": TargetQty });
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            for (var mi = 0; mi < MachineLength; mi++) {
+                DateCounter = 0;
+                for (var i = 0; i < ListofDate.length; i++) {
+                    var MachineID = parseInt($("#MachineDataList").val()[MachineCounter]);
+                    DailyTargetList.push({ "TargetDate": ListofDate[DateCounter].TargetDate, "TargetQty": ListofDate[DateCounter].TargetQty, "MachineID": MachineID })
+                    DateCounter++;
+                }
+                MachineCounter++;
+            }
+            var mode = $("#btnSaveDailyTarget > span.btnLabel").text().toLowerCase();
+            DailyTarget.msg = "Are you sure you want to " + mode + " this Machine Target?";
+            DailyTarget.confirmAction().then(function (approve) {
+                if (approve)
+                    DailyTarget.saveMachineTarget(DailyTargetList);
+            });
+        });
+        $("#btnDeleteMachineTarget").click(function () {
+            DailyTarget.msg = "Are you sure you want to delete this Machine Target?";
+            DailyTarget.confirmAction().then(function (approve) {
+                if (approve)
+                    DailyTarget.deleteMachineTarget();
+            });
+        });
+        $('#FilterMachineID').select2({
+            ajax: {
+                url: "/General/MySQLGetSelect2Data",
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        id: 'ID',
+                        text: "MachineName",
+                        table: 'mMachine',
+                        db: 'SHIN-ETSU-MYSQL',
+                        condition: ' AND IsDeleted=0 ',
+                        display: 'id&text',
+                    };
+                },
+            },
+            placeholder: '--Please Select Machine ID--',
+        });
+        $("#frmFilterDailyTarget").submit(function (e) {
+            e.preventDefault();
+            if (DailyTarget.$TabValidation === "daily") {
+                var MachineLength = $("#FilterMachineID").val().length;
+                var lastRow = $("#FilterMachineID").val().length - 1;
+                var MachineData = $("#FilterMachineID").val();
+                var vhtml = "";
+                var counter = 0;
+                for (var i = 0; i < MachineLength; i++) {
+                    if (counter === lastRow) {
+                        vhtml += "'" + MachineData[counter] + "'";
+                    }
+                    else {
+                        vhtml += "'" + MachineData[counter] + "'" + ",";
+                    }
+
+                    counter++;
+                }
+                DailyTarget.$DailyCondition = vhtml;
+                $("#btnExportDetails").removeAttr("disabled", "disabled");
+            }
+            else if (DailyTarget.$TabValidation === "monthly") {
+                var MachineLength = $("#FilterMachineID").val().length;
+                var lastRow = $("#FilterMachineID").val().length - 1;
+                var MachineData = $("#FilterMachineID").val();
+                var vhtml = "";
+                var counter = 0;
+                for (var i = 0; i < MachineLength; i++) {
+                    if (counter === lastRow) {
+                        vhtml += "'" + MachineData[counter] + "'";
+                    }
+                    else {
+                        vhtml += "'" + MachineData[counter] + "'" + ",";
+                    }
+
+                    counter++;
+                }
+                DailyTarget.$DailyCondition = vhtml;
+                $("#btnExportDetails").removeAttr("disabled", "disabled");
+            }
+            else if (DailyTarget.$TabValidation === "weekly") {
+                var MachineLength = $("#FilterMachineID").val().length;
+                var lastRow = $("#FilterMachineID").val().length - 1;
+                var MachineData = $("#FilterMachineID").val();
+                var vhtml = "";
+                var counter = 0;
+                for (var i = 0; i < MachineLength; i++) {
+                    if (counter === lastRow) {
+                        vhtml += "'" + MachineData[counter] + "'";
+                    }
+                    else {
+                        vhtml += "'" + MachineData[counter] + "'" + ",";
+                    }
+
+                    counter++;
+                }
+                DailyTarget.$DailyCondition = vhtml;
+                $("#btnExportDetails").removeAttr("disabled", "disabled");
+            }
+            else {
+                $("#btnExportDetails").removeAttr("disabled", "disabled");
+            }
+            DailyTarget.formData = $('#frmFilterDailyTarget').serializeArray();
+            DailyTarget.setJsonData();
+            DailyTarget.$tblDailyTarget.ajax.reload(null, false);
+        });
+        $("#btnCancelDataDailyTarget").click(function () {
+            DailyTarget.$DailyCondition = '0';
+            DailyTarget.clearFromData("frmFilterDailyTarget");
+            DailyTarget.formData = $('#frmFilterDailyTarget').serializeArray();
+            DailyTarget.setJsonData();
+            DailyTarget.$tblDailyTarget.ajax.reload(null, false);
+            $("#btnExportDetails").attr("disabled", true);
+        });
+        $("#MachineTargetTabValid").click(function () {
+            DailyTarget.$TabValidation = "machine";
+            DailyTarget.datepickerValidation();
+            DailyTarget.resetDataPanel();
+            $("#btnExportDetails").attr("disabled", true);
+        });
+        $("#DailyFilterTabValid").click(function () {
+            DailyTarget.$TabValidation = "daily";
+            DailyTarget.datepickerValidation();
+            DailyTarget.resetDataPanel();
+            $("#btnExportDetails").attr("disabled", true);
+        });
+        $("#MonthlyFilterTabValid").click(function () {
+            DailyTarget.$TabValidation = "monthly";
+            DailyTarget.datepickerValidation();
+            DailyTarget.resetDataPanel();
+            $("#btnExportDetails").attr("disabled", true);
+        });
+        $("#WeeklyFilterTabValid").click(function () {
+            DailyTarget.$TabValidation = "weekly";
+            DailyTarget.datepickerValidation();
+            DailyTarget.resetDataPanel();
+            $("#btnExportDetails").attr("disabled", true);
+        });
+        $("#btnSetWeeklySetting").click(function () {
+            DailyTarget.getWeeklyList();
+        });
+        $(".WeeklySettingFrom,.WeeklySettingTo").datepicker({
+            todayHighlight: true,
+            autoclose: true,
+            format: "yyyy-mm-dd"
+        });
+        $("#btnAddWeeklySetting").click(function () {
+            DailyTarget.drawWeeklyList();
+        });
+        $("#WeeklySettingListContainer").on("click", ".btnMinusID", function () {
+            var ID = $(this).data('id');
+            DailyTarget.removeRow(ID);
+        });
+        $("#frmWeeklySetting").submit(function (e) {
+            e.preventDefault();
+        });
+        $("#btnSaveWeeklySetting").click(function () {
+            $("#frmWeeklySetting").submit();
+            DailyTarget.saveWeeklySetting();
+
+        });
+        $("#btnCancelWeeklySetting,#btnCloseWeeklySetting").click(function () {
+            DailyTarget.ResetWeeklySetting();
+        });
+        $("#btnExportDetails").click(function () {
+            var TempListData = DailyTarget.GenerateWeeklyListData;
+            var TempListDataValue = DailyTarget.GenerateWeeklyListDataValue;
+            var TempHeaderListValue = DailyTarget.GenerateWeeklyHeaderListValue;
+            var TempGenerateMainListListValue = DailyTarget.GenerateMainList;
+            var TempListData_ = "";
+            var TempListDataValue_ = "";
+            var TempHeaderListValue_ = "";
+            var TempGenerateMainListListValue_ = "";
+            var TempGenerateDailyListListValue_ = "";
+            for (var TempListDatai = 0; TempListDatai < TempListData.length; TempListDatai++) {
+                TempListData_ += TempListData[TempListDatai].Achievement +
+                    "," + TempListData[TempListDatai].Actual +
+                    "," + TempListData[TempListDatai].Date +
+                    "," + TempListData[TempListDatai].MixerData +
+                    "," + TempListData[TempListDatai].Target + ":";
+            }
+            for (var TempListDataValuei = 0; TempListDataValuei < TempListDataValue.length; TempListDataValuei++) {
+                TempListDataValue_ += TempListDataValue[TempListDataValuei].Date +
+                    "," + TempListDataValue[TempListDataValuei].MixerData +
+                    "," + TempListDataValue[TempListDataValuei].MixerName + ":";
+            }
+            for (var TempHeaderListValuei = 0; TempHeaderListValuei < TempHeaderListValue.length; TempHeaderListValuei++) {
+                TempHeaderListValue_ += TempHeaderListValue[TempHeaderListValuei].MixerName + ":";
+            }
+            for (var TempGenerateMainListListValuei = 0; TempGenerateMainListListValuei < TempGenerateMainListListValue.length; TempGenerateMainListListValuei++) {
+                TempGenerateMainListListValue_ += TempGenerateMainListListValue[TempGenerateMainListListValuei].Date +
+                    "," + TempGenerateMainListListValue[TempGenerateMainListListValuei].MixerName +
+                    "," + TempGenerateMainListListValue[TempGenerateMainListListValuei].Target + ":";
+            }
+            for (var TempListDataValuei_ = 0; TempListDataValuei_ < TempListDataValue.length; TempListDataValuei_++) {
+                TempGenerateDailyListListValue_ += TempListDataValue[TempListDataValuei_].Target +
+                    "," + TempListDataValue[TempListDataValuei_].Actual +
+                    "," + TempListDataValue[TempListDataValuei_].Date +
+                    "," + TempListDataValue[TempListDataValuei_].Achievement +
+                    "," + TempListDataValue[TempListDataValuei_].MixerName + ":";
+            }
+            if (DailyTarget.$TabValidation === "machine") {
+                window.location = '/Transaction/DailyTargetVsActual/GenerateActualData?MainListData=' + TempGenerateMainListListValue_ + "&TabType=" + DailyTarget.$TabValidation;
+            }
+            else if (DailyTarget.$TabValidation === "daily") {
+                window.location = '/Transaction/DailyTargetVsActual/GenerateActualData?ListData=' + TempGenerateDailyListListValue_ + "&HeaderListValue=" + TempHeaderListValue_ + "&TabType=" + DailyTarget.$TabValidation;
+            }
+            else if (DailyTarget.$TabValidation === "monthly") {
+                window.location = '/Transaction/DailyTargetVsActual/GenerateActualData?ListData=' + TempListData_ + "&ListDataValue=" + TempListDataValue_ + "&HeaderListValue=" + TempHeaderListValue_ + "&TabType=" + DailyTarget.$TabValidation;
+            }
+            else if (DailyTarget.$TabValidation === "weekly") {
+                window.location = '/Transaction/DailyTargetVsActual/GenerateActualData?ListData=' + TempListData_ + "&ListDataValue=" + TempListDataValue_ + "&HeaderListValue=" + TempHeaderListValue_ + "&TabType=" + DailyTarget.$TabValidation;
+
+            }
+
+        });
+        DailyTarget.$tblDailyTarget.on('draw.dt', function () {
+            CUI.dataTableID = "#tblDailyTarget";
+            CUI.setDatatableMaxHeightFixed();
+            var tbldata = DailyTarget.getDataTableData(DailyTarget.$tblDailyTarget.rows().data());
+            DailyTarget.GenerateMainList = [];
+            if (DailyTarget.$TabValidation === "machine") {
+                DailyTarget.$tblDailyTarget.columns('.MachineDataValid').visible(true);
+                DailyTarget.$tblDailyTarget.columns('.DailyDataValid').visible(false);
+                for (var i = 0; i < tbldata.length; i++) {
+                    DailyTarget.GenerateMainList.push({ "Date": tbldata[i].TargetDate, "MixerName": tbldata[i].MachineIDValue, "Target": tbldata[i].TargetQty })
+                }
+
+
+            }
+            else if (DailyTarget.$TabValidation === "daily") {
+                DailyTarget.$tblDailyTarget.columns('.DailyDataValid').visible(true);
+                DailyTarget.$tblDailyTarget.columns('.MachineDataValid').visible(false);
+                DailyTarget.drawDailyTargetData(tbldata);
+            }
+            else if (DailyTarget.$TabValidation === "monthly") {
+                DailyTarget.drawMonthlyTargetData(tbldata);
+            }
+            else if (DailyTarget.$TabValidation === "weekly") {
+                DailyTarget.GraphWeeklyTarget = [];
+                DailyTarget.GraphWeeklyTarget.push(tbldata);
+                DailyTarget.drawWeeklyTargetData();
+            }
+        });
+        DailyTarget.$tblDailyTarget.on('select', function (e, dt, type, indexes) {
+            $('#btnDeleteMachineTarget').removeAttr("disabled");
+        });
+        DailyTarget.$tblDailyTarget.on('deselect', function (e, dt, type, indexes) {
+            $('#btnDeleteMachineTarget').attr("disabled", "disabled");
+        });
+    });
+})();

@@ -1,0 +1,272 @@
+﻿@{
+    ViewBag.Title = "Template Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/TemplateMaster-CSS")
+}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-list-alt"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body p-0">
+    </div>
+    <div class="hljs-wrapper">
+        <div class="row ">
+            <div class="col-md-6">
+                <div class="panel panel-inverse" data-init="false">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">  Templates</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row ">
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnNewTemplate" class="btn btn-sm btn-primary btn-block"><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnEditTemplate" class="btn btn-sm btn-info btn-block" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 DeleteEnabled">
+                                <button type="button" id="btnDeleteTemplate" class="btn btn-sm btn-danger btn-block" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                            </div>
+                        </div>
+                        <table id="tblTemplate" class="table zebraStyle  table-bordered tbl-100p" data-adjust="0"></table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-inverse" data-ng-init="false">
+                    <div class="panel-heading">
+                        <h4 class="panel-title"> Process Data </h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row ">
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnNewProcess" class="btn btn-sm btn-primary btn-block" disabled><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnEditProcess" class="btn btn-sm btn-info btn-block" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 DeleteEnabled">
+                                <button type="button" id="btnDeleteProcess" class="btn btn-sm btn-danger btn-block" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                            </div>
+                        </div>
+                        <table id="tblProcess" class="table zebraStyle  table-bordered tbl-100p" data-adjust="0"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-md-6">
+                <div class="panel panel-inverse" data-init="false">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">  Hourly Checking Data</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row ">
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnNewHourlyCheck" class="btn btn-sm btn-primary btn-block" disabled><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnEditHourlyCheck" class="btn btn-sm btn-info btn-block" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 DeleteEnabled">
+                                <button type="button" id="btnDeleteHourlyCheck" class="btn btn-sm btn-danger btn-block" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                            </div>
+                        </div>
+                        <table id="tblHourlyCheck" class="table zebraStyle  table-bordered tbl-100p" data-adjust="0"></table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-inverse" data-ng-init="false">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">  After Finished Cycle Data</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row ">
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnNewAfterCycle" class="btn btn-sm btn-primary btn-block" disabled><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 ReadAndWrite">
+                                <button type="button" id="btnEditAfterCycle" class="btn btn-sm btn-info btn-block" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                            </div>
+                            <div class="col-md-4 m-b-5 DeleteEnabled">
+                                <button type="button" id="btnDeleteAfterCycle" class="btn btn-sm btn-danger btn-block" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                            </div>
+                        </div>
+                        <table id="tblAfterCycle" class="table zebraStyle  table-bordered tbl-100p" data-adjust="0"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlTemplate" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlTypeTitle"> Create Template</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmTemplate">
+                <div class="modal-body">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:80px;" for="Template"> Template <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" id="TemplateName" name="TemplateName" class="form-control input" placeholder="Template" data-parsley-required data-parsley-maxlength="50" data-parsley-errors-container="#err-Template" autocomplete="off">
+                    </div>
+                    <div id="err-Template"></div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" class="input" id="TypeMainID" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveTemplate"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelTemplate"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlProcess" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlProcessTitle"> Create Process</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmProcess">
+                <div class="modal-body">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="ProcessName"> ProcessName <span class="text-danger"> *</span></label>
+                        </div>
+                        <select id="ProcessID" name="ProcessID" class="form-control input onChangeParsley" data-parsley-required data-parsley-errors-container="#err-ProcessName"></select>
+                    </div>
+                    <div id="err-ProcessName"></div>
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="TemplateName"> TemplateName <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" id="TemplateNames" readonly name="TemplateName" class="form-control input" placeholder="TemplateName" data-parsley-required data-parsley-maxlength="255" data-parsley-errors-container="#err-TemplateName" autocomplete="off">
+                    </div>
+                    <div id="err-TemplateName"></div>
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="DataType"> DataType <span class="text-danger"> *</span></label>
+                        </div>
+                        <select class="form-control input custom-select" id="DataType" name="DataType" required data-parsley-errors-container="#err-DataType">
+                            <option value="">Choose Datatype</option>
+                            <option value="int">int</option>
+                            <option value="time">time</option>
+                            <option value="text">text</option>
+                            <option value="date">date</option>
+                        </select>
+                    </div>
+                    <div id="err-DataType"></div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" class="input" id="ProcessIDs" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveProcess"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelProcess"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlHourlyChecking" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlHourlyCheckingTitle"> Create Hourly Checking</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmHourlyChecking">
+                <div class="modal-body">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="TemplateName"> TemplateName <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" id="HTemplateNames" readonly name="TemplateName" class="form-control input" placeholder="TemplateName" data-parsley-required data-parsley-maxlength="255" data-parsley-errors-container="#err-HTemplateName" autocomplete="off">
+                    </div>
+                    <div id="err-HTemplateName"></div>
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="Interval"> Interval <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" class="form-control input dcml" data-parsley-maxlength="18" id="Interval" name="Interval" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" required data-parsley-errors-container="#err-Interval" autocomplete="off">
+                    </div>
+                    <div id="err-Interval"></div>
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="TempCut"> Temperature Cut <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" class="form-control input dcml" data-parsley-maxlength="18" id="TempCut" name="TempCut" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" required data-parsley-errors-container="#err-TempCut" autocomplete="off">
+                    </div>
+                    <div id="err-TempCut"></div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" class="input" id="HourlyCheckingIDs" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveHourlyChecking"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelHourlyChecking"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlAfterCycle" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlAfterCycleTitle"> Create After Cycle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmAfterCycle">
+                <div class="modal-body">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="TemplateName"> TemplateName <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" id="ATemplateNames" readonly name="TemplateName" class="form-control input" placeholder="TemplateName" data-parsley-required data-parsley-maxlength="255" data-parsley-errors-container="#err-ATemplateName" autocomplete="off">
+                    </div>
+                    <div id="err-ATemplateName"></div>
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="Interval"> Interval <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" class="form-control input dcml" data-parsley-maxlength="18" id="AInterval" name="Interval" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" required data-parsley-errors-container="#err-AInterval" autocomplete="off">
+                    </div>
+                    <div id="err-AInterval"></div>
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:110px;" for="TempLimit"> Temperature Limit <span class="text-danger"> *</span></label>
+                        </div>
+                        <input type="text" class="form-control input dcml" data-parsley-maxlength="18" id="TempLimit" name="TempLimit" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" required data-parsley-errors-container="#err-TempLimit" autocomplete="off">
+                    </div>
+                    <div id="err-TempLimit"></div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" class="input" id="AfterCycleIDs" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveAfterCycle"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelAfterCycle"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section scripts{
+    @Scripts.Render("~/TemplateMaster-JS")
+}

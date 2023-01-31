@@ -1,0 +1,9 @@
+﻿namespace Kedica.Areas.Documents.Models
+{
+    public class tUserManual
+    {
+        public int ID { get; set; }
+        public string FileName { get; set; }
+        public string FileDocumentName { get; set; }
+    }
+}

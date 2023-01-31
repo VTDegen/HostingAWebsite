@@ -1,0 +1,31 @@
+﻿namespace Kedica.Areas.Transaction.Models
+{
+    public class tDailyTargetVsActual
+    {
+        public int ID { get; set; }
+        public string TargetDate { get; set; }
+        public int TargetQty { get; set; }
+        public int MachineID { get; set; }
+        public int ActualQty { get; set; }
+        public int FECLQty { get; set; }
+        public int DrumQty { get; set; }
+        public int NoCycleQty { get; set; }
+        public string MachineIDValue { get; set; }
+        public string MachineName { get; set; }
+    }
+    public class WeeklyTarget
+    {
+        public int GroupCountData { get; set; }
+        public string DateFrom { get; set; }
+        public string DateTo { get; set; }
+    }
+    public class GenerateWeeklyData
+    {
+        public string Date { get; set; }
+        public string MixerData { get; set; }
+        public string Target { get; set; }
+        public string Achievement { get; set; }
+        public string Actual { get; set; }
+        public string MixerName { get; set; }
+    }
+}

@@ -1,0 +1,585 @@
+﻿using Kedica.Areas.MasterMaintenance.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web.Mvc;
+namespace Kedica.Areas.MasterMaintenance.Controllers
+{
+    public class MachineMasterController : Controller
+    {
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+        // GET: MasterMaintenance/MachineMaster
+        public ActionResult Index()
+        {
+            return View("MachineMaster");
+        }
+        public ActionResult GetMachineList()
+        {
+            List<mMachine> data = new List<mMachine>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Machine_GetList";
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new mMachine
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    MachineName = sdr["MachineName"].ToString(),
+                                    TargetTemperature = Convert.ToInt32(sdr["TargetTemperature"]),
+                                    TimeInterval = Convert.ToInt32(sdr["TimeInterval"]),
+                                    IsActive = sdr["IsActive"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.MachineName.ToLower().Contains(searchValue.ToLower()) ||
+                    x.TimeInterval.ToString().Contains(searchValue.ToLower()) ||
+                    x.TargetTemperature.ToString().Contains(searchValue.ToLower())
+                ).ToList<mMachine>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<mMachine>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveMachine(mMachine Machine)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                        {
+                            cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMyMySql.CommandText = "Machine_InsertUpdate";
+                            cmdMyMySql.Parameters.Clear();
+                            cmdMyMySql.Parameters.AddWithValue("@_ID", Machine.ID);
+                            cmdMyMySql.Parameters.AddWithValue("@_MachineName", Machine.MachineName);
+                            cmdMyMySql.Parameters.AddWithValue("@TargetTemperature", Machine.TargetTemperature);
+                            cmdMyMySql.Parameters.AddWithValue("@TimeInterval", Machine.TimeInterval);
+                            cmdMyMySql.Parameters.AddWithValue("@_IsActive", Convert.ToInt32(Machine.IsActive));
+                            cmdMyMySql.Parameters.AddWithValue("@CreateID", Session["UserName"]);
+
+                            MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                            MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdMyMySql.ExecuteNonQuery();
+                            endMsg = Machine.ID == 0 ? "saved." : "updated";
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                            {
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+                            }
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Machine was successfully " + endMsg });
+            }
+        }
+        public ActionResult DeleteMachine(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Machine_Delete";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@MachineID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Machine was successfully deleted." });
+
+        }
+        public ActionResult GetMachineDetails(int ID)
+        {
+            mMachine machineDetails = new mMachine();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Machine_GetDatalist";
+                        cmdMyMySql.Parameters.AddWithValue("@MachineID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            machineDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            machineDetails.MachineName = sdr["MachineName"].ToString();
+                            machineDetails.TargetTemperature = Convert.ToInt32(sdr["TargetTemperature"]);
+                            machineDetails.TimeInterval = Convert.ToInt32(sdr["TimeInterval"]);
+                            machineDetails.IsActive = sdr["IsActive"].ToString();
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { machineData = machineDetails } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetWaterIPAddressList()
+        {
+            List<IpAddressData> data = new List<IpAddressData>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+            int SensorType = Convert.ToInt32(Request["SensorType"]);
+            int MachineID = Convert.ToInt32(Request["MachineID"]);
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Machine_IpAddress_GetDatalist";
+                        cmdMySql.Parameters.AddWithValue("@SensorType", SensorType);
+                        cmdMySql.Parameters.AddWithValue("@_MachineID", MachineID);
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new IpAddressData
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    IpAddress = sdr["IPAddress"].ToString(),
+                                    EffectiveDate = sdr["EffectiveDate"].ToString()
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.IpAddress.ToLower().Contains(searchValue.ToLower()) ||
+                    x.EffectiveDate.ToString().Contains(searchValue.ToLower())
+                ).ToList<IpAddressData>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<IpAddressData>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetHeatIPAddressList()
+        {
+            List<IpAddressData> data = new List<IpAddressData>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+            int SensorType = Convert.ToInt32(Request["SensorType"]);
+            int MachineID = Convert.ToInt32(Request["MachineID"]);
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Machine_IpAddress_GetDatalist";
+                        cmdMySql.Parameters.AddWithValue("@SensorType", SensorType);
+                        cmdMySql.Parameters.AddWithValue("@_MachineID", MachineID);
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new IpAddressData
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    IpAddress = sdr["IPAddress"].ToString(),
+                                    EffectiveDate = sdr["EffectiveDate"].ToString()
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.IpAddress.ToLower().Contains(searchValue.ToLower()) ||
+                    x.EffectiveDate.ToString().Contains(searchValue.ToLower())
+                ).ToList<IpAddressData>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<IpAddressData>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetElectricityIPAddressList()
+        {
+            List<IpAddressData> data = new List<IpAddressData>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+            int SensorType = Convert.ToInt32(Request["SensorType"]);
+            int MachineID = Convert.ToInt32(Request["MachineID"]);
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Machine_IpAddress_GetDatalist";
+                        cmdMySql.Parameters.AddWithValue("@SensorType", SensorType);
+                        cmdMySql.Parameters.AddWithValue("@_MachineID", MachineID);
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new IpAddressData
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    IpAddress = sdr["IPAddress"].ToString(),
+                                    EffectiveDate = Convert.ToDateTime(sdr["EffectiveDate"]).ToString("MM/dd/yyyy")
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.IpAddress.ToLower().Contains(searchValue.ToLower()) ||
+                    x.EffectiveDate.ToString().Contains(searchValue.ToLower())
+                ).ToList<IpAddressData>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<IpAddressData>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveIPData(IpAddressData IPData)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdMySql = conn.CreateCommand())
+                        {
+                            cmdMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMySql.CommandText = "Machine_IpAddress_InsertUpdate";
+                            cmdMySql.Parameters.Clear();
+                            cmdMySql.Parameters.AddWithValue("@_ID", IPData.ID);
+                            cmdMySql.Parameters.AddWithValue("@IpAddress", IPData.IpAddress);
+                            cmdMySql.Parameters.AddWithValue("@_EffectiveDate", Convert.ToDateTime(IPData.EffectiveDate).ToString("yyyy-MM-dd"));
+                            cmdMySql.Parameters.AddWithValue("@SensorType", IPData.SensorType);
+                            cmdMySql.Parameters.AddWithValue("@MachineID", IPData.MachineID);
+                            cmdMySql.Parameters.AddWithValue("@CreateID", Session["UserName"]);
+
+                            MySqlParameter ErrorMessage = cmdMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                            MySqlParameter Error = cmdMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdMySql.ExecuteNonQuery();
+                            endMsg = IPData.ID == 0 ? "saved." : "updated";
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                            {
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+                            }
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Ip Address was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetIpAddressDetails(int ID)
+        {
+            IpAddressData ipaddressDetails = new IpAddressData();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Machine_IpAddress_GetDatalistbyID";
+                        cmdMySql.Parameters.AddWithValue("@IpAddressID", ID);
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            ipaddressDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            ipaddressDetails.IpAddress = sdr["IPAddress"].ToString();
+                            ipaddressDetails.EffectiveDate = sdr["EffectiveDate"].ToString();
+                            ipaddressDetails.SensorType = Convert.ToInt32(sdr["Sensor"]);
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { ipaddressData = ipaddressDetails } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteIpAddress(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Machine_IpAddress_Delete";
+
+                        cmdMySql.Parameters.Clear();
+                        cmdMySql.Parameters.AddWithValue("@IpID", ID);
+                        cmdMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        cmdMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "IP Address was successfully deleted." });
+
+        }
+    }
+}

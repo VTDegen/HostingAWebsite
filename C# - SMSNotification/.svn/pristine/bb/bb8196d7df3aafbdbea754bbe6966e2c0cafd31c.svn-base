@@ -1,0 +1,450 @@
+﻿"use strict";
+(function () {
+    const RealTimeView = function () {
+        return new RealTimeView.init();
+    }
+    RealTimeView.init = function () {
+        $D.init.call(this);
+        this.arrRealTimeList = [];
+        this.arrRealTimeListDataBelow = [];
+        this.arrDataRealTime = "";
+        this.$tblRealTimeData = "";
+    }
+    RealTimeView.prototype = {
+        drawDatatables: function () {
+            var self = this;
+            if (!$.fn.DataTable.isDataTable('#tblRealTimeData')) {
+                self.$tblRealTimeData = $('#tblRealTimeData').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 480,
+                    "ajax": {
+                        "url": "/Reports/RealTimeReportViewing/GetRealTimeViewingResult",
+                        "type": "POST",
+                        "datatype": "json",
+                    },
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        { title: "No Data", data: "ID", visible: false },
+                        { title: "No Data", data: "NoData" },
+                        { title: "GridData", data: "GridData" },
+                        { title: "Temp", data: "Temp" },
+                        { title: "Elec", data: "Elec" },
+                        { title: "Water", data: "Water" },
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                });
+            }
+            return this;
+        },
+    };
+    RealTimeView.init.prototype = $.extend(RealTimeView.prototype, $D.init.prototype);
+    RealTimeView.init.prototype = RealTimeView.prototype;
+    $(document).ready(function () {
+        var RealTime = RealTimeView();
+        RealTime.drawDatatables();
+        var tid = setTimeout(mycode, 2000);
+        function mycode() {
+            RealTime.$tblRealTimeData.ajax.reload(null, false);
+            tid = setTimeout(mycode, 60000);
+        }
+        RealTime.$tblRealTimeData.on('draw.dt', function () {
+            $("#live-updated-chart").remove();
+            var vhtml = "";
+            vhtml += "<div id='live-updated-chart' class='height-sm'></div>";
+            $("#graphbody").append(vhtml);
+
+
+            CUI.dataTableID = "#tblRealTimeData";
+            CUI.setDatatableMaxHeightFixed();
+            var tbldata = RealTime.getDataTableData(RealTime.$tblRealTimeData.rows().data());
+            var tbldatalength = tbldata.length;
+            var FirstCounterData = 0;
+            var FirstTempCounterData = 0;
+            var FirsttempElectData = [];
+            var FirsttempTempData = [];
+            var FirsttempElectResultData = [];
+
+            var FirsttempTempResultData = [];
+            var FirsttempDataValidation = [];
+            var FirsttempFinalData = [];
+            var HoldThirdCondition = [];
+            var HoldThirdConditionResultData = [];
+            var SecondtempElectData = [];
+            var SecondtempTempData = [];
+            var SecondtempElectResultData = [];
+            var SecondtempTempResultData = [];
+            var SecondtempDataValidation = [];
+            var SecondtempFinalData = [];
+            //First Condition
+            //Get First 12 Data in a row in all condition
+            if (tbldata.length <= 15) {
+
+            }
+            else {
+                for (var nhi = 0; nhi < 15; nhi++) {
+
+                    SecondtempElectData.push(tbldata[(tbldata.length - 1) - FirstCounterData].Elec);
+                    SecondtempTempData.push(tbldata[(tbldata.length - 1) - FirstCounterData].Temp);
+                    FirstCounterData++;
+                }
+            }
+            if (tbldata.length <= 2) {
+
+            }
+            else {
+                for (var firstemp = 0; firstemp < 2; firstemp++) {
+                    FirsttempElectData.push(tbldata[(tbldata.length - 1) - FirstTempCounterData].Elec);
+                    FirsttempTempData.push(tbldata[(tbldata.length - 1) - FirstTempCounterData].Temp);
+                    HoldThirdCondition.push(tbldata[(tbldata.length - 1) - FirstTempCounterData].Temp);
+                    FirstTempCounterData++;
+                }
+            }
+
+
+            for (var HoldC = 0; HoldC < HoldThirdCondition.length; HoldC++) {
+                if (FirsttempTempData[HoldC] >= 80) {
+                    HoldThirdConditionResultData.push(1)
+                }
+            }
+
+            for (var TempLoopi = 0; TempLoopi < FirsttempTempData.length; TempLoopi++) {
+                if (FirsttempTempData[TempLoopi] >= 60) {
+                    FirsttempTempResultData.push(1)
+                }
+                else {
+                    FirsttempTempResultData.push(0)
+                }
+            }
+            for (var TempLoopTempi = 0; TempLoopTempi < FirsttempElectData.length; TempLoopTempi++) {
+                if (FirsttempElectData[TempLoopTempi] === 0) {
+                    FirsttempElectResultData.push(1)
+                }
+                else {
+                    FirsttempElectResultData.push(0)
+                }
+            }
+            //Second
+            for (var SecondTempLoopi = 0; SecondTempLoopi < SecondtempTempData.length; SecondTempLoopi++) {
+                if (SecondtempTempData[SecondTempLoopi] <= 59) {
+                    SecondtempTempResultData.push(1)
+                }
+            }
+            for (var SecondTempLoopTempi = 0; SecondTempLoopTempi < SecondtempElectData.length; SecondTempLoopTempi++) {
+                if (SecondtempElectData[SecondTempLoopTempi] === 0) {
+                    SecondtempElectResultData.push(1)
+                }
+                else {
+                    SecondtempElectResultData.push(0)
+                }
+            }
+            //Check Each Data
+            //First
+            for (var CheckDup = 0; CheckDup < FirsttempTempResultData.length; CheckDup++) {
+                if ((FirsttempTempResultData[CheckDup] && FirsttempElectResultData[CheckDup]) == 1) {
+                    FirsttempDataValidation.push(1)
+                }
+                else {
+                    FirsttempDataValidation.push(0)
+                }
+            }
+            //Second
+            for (var SecondCheckDup = 0; SecondCheckDup < SecondtempTempResultData.length; SecondCheckDup++) {
+                if ((SecondtempTempResultData[SecondCheckDup] && SecondtempElectResultData[SecondCheckDup]) == 1) {
+                    SecondtempDataValidation.push(1)
+                }
+                else {
+                    SecondtempDataValidation.push(0)
+                }
+            }
+            //Find 
+            //First
+            for (var BOP = 0; BOP < FirsttempDataValidation.length; BOP++) {
+                if (FirsttempDataValidation[BOP] === 0) {
+                    FirsttempFinalData.push(1);
+                }
+            }
+            //Second
+            for (var SecondBOP = 0; SecondBOP < SecondtempDataValidation.length; SecondBOP++) {
+                if (SecondtempDataValidation[SecondBOP] === 0) {
+                    SecondtempFinalData.push(1);
+                }
+            }
+            //Check Validation
+            //First
+
+            var tempTemperatureData = [];
+            var tempWaterData = [];
+            var tempDateData = [];
+            var tempElecDateData = [];
+            var tempElecData = [];
+            for (var TempData = 0; TempData < tbldatalength; TempData++) {
+                tempTemperatureData.push(tbldata[TempData].Temp);
+                tempWaterData.push(tbldata[TempData].Water);
+                tempDateData.push(tbldata[TempData].GridData);
+                tempElecData.push(tbldata[TempData].Elec);
+                tempElecDateData.push(tbldata[TempData].TempElecGridData);
+
+            }
+
+            var LineChartConfiguration = {
+                chart: {
+                    height: 350,
+                    type: 'line',
+                    shadow: {
+                        enabled: true,
+                        color: COLOR_GREEN_LIGHTER,
+                        top: 18,
+                        left: 7,
+                        blur: 10,
+                        opacity: 1
+                    },
+                    toolbar: {
+                        show: true
+                    }
+                },
+                title: {
+                    text: 'Water and Temperature',
+                    align: 'center'
+                },
+                colors: [COLOR_RED_LIGHTER, "rgba(0,121,250,0.55)"],
+                dataLabels: {
+                    enabled: false,
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 5
+                },
+                fill: {
+                    type: 'solid',
+                    opacity: [0.35, 1],
+                },
+                series: [{
+                    name: 'Temperature',
+                    type: 'area',
+                    data: tempTemperatureData
+
+                }, {
+                    name: 'Water',
+                    type: 'area',
+                    data: tempWaterData
+                }],
+                grid: {
+                    row: {
+                        colors: [COLOR_SILVER_TRANSPARENT_1, 'transparent'],
+                        opacity: 0.5
+                    },
+                },
+
+                xaxis: {
+                    categories: tempDateData,
+                    labels: {
+                        show: false
+                    },
+                    axisBorder: {
+                        show: true,
+                        color: COLOR_SILVER_TRANSPARENT_5,
+                        height: 2,
+                        width: '100%',
+                        offsetX: 0,
+                        offsetY: -1
+                    },
+                    axisTicks: {
+                        show: true,
+                        borderType: 'solid',
+                        color: COLOR_SILVER,
+                        height: 6,
+                        offsetX: 0,
+                        offsetY: 0
+                    }
+                },
+                yaxis: [{
+                    min: 20,
+                    max: 120,
+                    axisTicks: {
+                        show: true,
+                    },
+                    axisBorder: {
+                        show: true,
+                        color: COLOR_RED_LIGHTER
+                    },
+                    labels: {
+                        style: {
+                            color: COLOR_RED_LIGHTER
+                        }
+                    },
+                    title: {
+                        text: "Celcius",
+                        style: {
+                            color: COLOR_RED_LIGHTER
+                        }
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+
+                }, {
+                    min: 0,
+                    max: 400,
+                    seriesName: 'Water',
+                    opposite: true,
+                    axisTicks: {
+                        show: true,
+                    },
+                    axisBorder: {
+                        show: true,
+                        color: COLOR_BLUE_LIGHTER
+                    },
+                    labels: {
+                        style: {
+                            color: COLOR_BLUE_LIGHTER
+                        }
+                    },
+                    title: {
+                        text: "Liters",
+                        style: {
+                            color: COLOR_BLUE_LIGHTER
+                        }
+                    },
+                }],
+                legend: {
+                    show: true,
+                    position: 'top',
+                    offsetY: -20,
+                    horizontalAlign: 'right',
+                    floating: true,
+                }
+            };
+            var LineChartView = new ApexCharts(document.querySelector('#live-updated-chart'), LineChartConfiguration);
+            LineChartView.render();
+            $("#live-updated-chart1").remove();
+            var vhtml1 = "";
+            vhtml1 += "<div id='live-updated-chart1' class='height-sm'></div>";
+            $("#secondgraphbody").append(vhtml1);
+
+            var AreaData = {
+                series: [{
+                    name: 'Electricity',
+                    type: 'area',
+                    data: tempElecData
+                }],
+
+                chart: {
+                    height: 350,
+                    type: 'line',
+                    toolbar: {
+                        show: false
+                    }
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                colors: [COLOR_GREEN_LIGHTER],
+                fill: {
+                    type: 'solid',
+                    opacity: [0.35, 1],
+                },
+                labels: tempDateData,
+                markers: {
+                    size: 0
+                },
+                xaxis: {
+                    labels: {
+                        show: false
+                    },
+                },
+                yaxis: [
+                    {
+                        title: {
+                            text: 'Ampere',
+                        },
+                        min: 0,
+                        max: 40
+                    },
+
+                ],
+                legend: {
+                    show: true,
+                    position: 'top',
+                    offsetY: -20,
+                    horizontalAlign: 'right',
+                    floating: true,
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    y: {
+                        formatter: function (y) {
+                            if (typeof y !== "undefined") {
+                                return y.toFixed(0) + " Ampere";
+                            }
+                            return y;
+                        }
+                    }
+                }
+            };
+
+            var Areachart = new ApexCharts(document.querySelector("#live-updated-chart1"), AreaData);
+            Areachart.render();
+            $("#latestWater").text(tbldata[tbldata.length - 1].Water);
+            $("#latestTemperature").text(tbldata[tbldata.length - 1].Temp);
+            $("#latestTempWaterDate").text(tbldata[tbldata.length - 1].ElecGridData);
+            $("#latestTempWaterDate1").text(tbldata[tbldata.length - 1].ElecGridData);
+            $("#latestElectric").text(tbldata[tbldata.length - 1].Elec);
+            if (FirsttempFinalData.length === 0) {
+                var vhtml = "";
+                $("#NotificationLabel").val("");
+                vhtml = "";
+                $("#mdlSampleData").modal('hide');
+                vhtml = "The mixer is not working";
+                $("#NotificationLabel").html(vhtml);
+                $("#mdlSampleData").modal('show');
+            }
+            else if (SecondtempFinalData.length === 0) {
+                var vhtml = "";
+                $("#NotificationLabel").val("")
+                $("#mdlSampleData").modal('hide');
+                vhtml += "Process is completed";
+                $("#NotificationLabel").html(vhtml);
+                $("#mdlSampleData").modal('show');
+            }
+            else if (tbldata[tbldata.length - 1].Temp >= 100) {
+                var vhtml = "";
+                $("#NotificationLabel").val("")
+                $("#mdlSampleData").modal('hide');
+                vhtml += "Newest temp. is 100℃ above";
+                $("#NotificationLabel").html(vhtml);
+                $("#mdlSampleData").modal('show');
+            }
+            else if (tbldata[tbldata.length - 1].Elec >= 30) {
+                var vhtml = "";
+                $("#NotificationLabel").val("")
+                $("#mdlSampleData").modal('hide');
+                vhtml += "Newest electrical current is overcurrent";
+                $("#NotificationLabel").html(vhtml);
+                $("#mdlSampleData").modal('show');
+            }
+            else if (HoldThirdConditionResultData.length === 2) {
+                var vhtml = "";
+                $("#NotificationLabel").val("")
+                $("#mdlSampleData").modal('hide');
+                vhtml += "Newest temp. is 80℃ above";
+                $("#NotificationLabel").html(vhtml);
+                $("#mdlSampleData").modal('show');
+            }
+            else {
+                $("#NotificationLabel").val("")
+                $("#mdlSampleData").modal('hide');
+
+            }
+        });
+        $("#btnViewModal").click(function () {
+            $("#mdlSampleData").modal('show');
+        });
+    });
+})();

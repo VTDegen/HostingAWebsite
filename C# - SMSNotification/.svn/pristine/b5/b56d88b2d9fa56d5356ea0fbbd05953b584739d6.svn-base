@@ -1,0 +1,48 @@
+﻿namespace Kedica.Areas.Reports.Models
+{
+    public class HPCMonitoringSheet
+    {
+        public string MixerData { get; set; }
+    }
+    public class PHCData
+    {
+        public int ID { get; set; }
+        public int TemplateID { get; set; }
+        public int MixerID { get; set; }
+        public int CycleID { get; set; }
+        public string ProcessDate { get; set; }
+        public string MachineName { get; set; }
+    }
+    public class PHCDataProcessList
+    {
+        public int ID { get; set; }
+        public string ProcessTemplateData { get; set; }
+    }
+    public class HPCDataHourlyCheck
+    {
+        public string TimeSetup { get; set; }
+        public string WaterTemp { get; set; }
+        public string HeatTemp { get; set; }
+
+    }
+    public class HPCDataAfterCycle
+    {
+        public string TimeCheck { get; set; }
+        public string TempCheck { get; set; }
+        public string Judgement { get; set; }
+
+    }
+    public class HPCSummary
+    {
+        public string UnloadingTime { get; set; }
+        public string OutputWeight { get; set; }
+        public string Remarks { get; set; }
+        public string MixingTimeFinished { get; set; }
+
+    }
+    public class ProcessList
+    {
+        public int ID { get; set; }
+        public string Process { get; set; }
+    }
+}

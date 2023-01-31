@@ -1,0 +1,103 @@
+﻿
+@{
+    ViewBag.Title = "Operation Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/OperationMaster-CSS")
+    <style>
+
+
+        ul {
+            list-style: none;
+        }
+    </style>}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-4 m-b-5 ReadAndWrite">
+                        <button type="button" id="btnAddOperation" class="btn btn-sm btn-primary btn-block"><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                    </div>
+                    <div class="col-sm-4 m-b-5 ReadAndWrite">
+                        <button type="button" id="btnEditOperation" class="btn btn-sm btn-info btn-block tbl-tr-btns" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                    </div>
+                    <div class="col-sm-4 m-b-5 DeleteEnabled">
+                        <button type="button" id="btnDeleteOperation" class="btn btn-sm btn-danger btn-block tbl-tr-btns" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hljs-wrapper">
+            <table id="tblOperation" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlOperation" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlOperationTitle"> Create Operation</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmOperation">
+                <div class="modal-body">
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="Process">Process <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="Process" name="Process" class="form-control input" data-parsley-required data-parsley-maxlength="100" data-parsley-errors-container="#err-Process" autocomplete="off">
+                            </div>
+                            <div id="err-Process"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="Cycle">Cycle <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="Cycle" name="Cycle" class="form-control input" data-parsley-required data-parsley-maxlength="20" data-parsley-errors-container="#err-Cycle" autocomplete="off">
+                            </div>
+                            <div id="err-Cycle"></div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="Role">Active <span class="text-danger">*</span></label>
+                                </div>
+                                <select id="IsActive" name="IsActive" class="form-control input" required data-parsley-errors-container="#err-IsActive" autocomplete="off">
+                                    <option value="">--Please Select--</option>
+                                    <option value="0">Active</option>
+                                    <option value="1">Not Active</option>
+                                </select>
+                            </div>
+                            <div id="err-IsActive"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" id="UserID" class="input" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveOperation"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelOperation"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section scripts{
+    @Scripts.Render("~/OperationMaster-JS")
+}

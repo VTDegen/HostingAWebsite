@@ -1,0 +1,35 @@
+﻿namespace Kedica.Areas.MasterMaintenance.Models
+{
+    public class mTemplate
+    {
+        public int ID { get; set; }
+        public string TemplateName { get; set; }
+    }
+    public class ProcessList
+    {
+        public int ID { get; set; }
+        public string TemplateName { get; set; }
+        public int TemplateNameID { get; set; }
+        public int ProcessID { get; set; }
+        public string ProcessName { get; set; }
+        public string DataType { get; set; }
+    }
+    public class HourlyChecking
+    {
+        public int ID { get; set; }
+        public string TemplateName { get; set; }
+        public int TemplateNameID { get; set; }
+        public int CycleCount { get; set; }
+        public decimal Interval { get; set; }
+        public decimal TempCut { get; set; }
+    }
+    public class AfterCycle
+    {
+        public int ID { get; set; }
+        public string TemplateName { get; set; }
+        public int TemplateNameID { get; set; }
+        public int CycleCount { get; set; }
+        public decimal Interval { get; set; }
+        public decimal TempLimit { get; set; }
+    }
+}

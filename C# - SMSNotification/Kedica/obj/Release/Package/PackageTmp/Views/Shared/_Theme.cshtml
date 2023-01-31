@@ -1,0 +1,35 @@
+﻿
+<div class="theme-panel theme-panel-lg" style="height:35%">
+    <a href="javascript:;" data-click="theme-panel-expand" title="Setup Mixer Configuration" class="theme-collapse-btn"><i class="fa fa-cog"></i></a>
+    <div class="theme-panel-content">
+        <h5 class="m-t-0">Setup Mixer Configuration</h5>
+        <div class="divider"></div>
+        <div class="row m-t-10">
+            <div class="col-md-4 control-label text-inverse f-w-600">Display Type</div>
+            <div class="col-md-8">
+                <select name="header-styling" id="MixerDisplayType" class="form-control form-control-md">
+                    <option value="">Select Type</option>
+                    <option value="1">Manual</option>
+                    <option value="2">Automatic</option>
+                </select>
+            </div>
+        </div>
+        <div class="row m-t-10">
+            <div class="col-md-4 control-label text-inverse f-w-600">Mixer List</div>
+            <div class="col-md-8">
+                <select name="header-fixed" id="MixerListData" class="form-control form-control-sm" disabled>
+                    <option value="">Select Mixer</option>
+
+                </select>
+            </div>
+        </div>
+        <div class="row m-t-10">
+            <div class="col-md-4 control-label text-inverse f-w-600">Timer List</div>
+            <div class="col-md-8">
+                <input type="number" name="sidebar-styling" id="MixerTimerID" class="form-control form-control-sm" disabled />
+            </div>
+        </div>
+
+        <button type="button" id="btnUpdateMixerSetup" hidden class="btn btn-sm btn-primary btn-block"><span class="fa fa-save"></span><span class="btnLabel"> Setup</span></button>
+    </div>
+</div>

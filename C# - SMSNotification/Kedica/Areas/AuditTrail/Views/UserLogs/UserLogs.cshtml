@@ -1,0 +1,137 @@
+﻿
+@{
+    ViewBag.Title = "User Logs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section css{
+    @Styles.Render("~/UserLogs-CSS")
+}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-scroll"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+  
+        <div class="row ">
+            <div class="col-3">
+
+            </div>
+            <div class="col-3">
+
+            </div>
+            <div class="col-3">
+             
+            </div>
+            @*<div class="col-3">
+                <button type="button" id="btnViewDetails" class="btn btn-sm btn-primary btn-block"><span class="fa fa-eye"></span><span class="btnLabel"> View</span></button>
+            </div>*@
+        </div>
+        <br />
+        <div class="hljs-wrapper">
+            <table id="tblUserLogList" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlViewDetails" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><span class="fa fa-eye"></span> View Details</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="mdlBodyUserAccess">
+                <div class="modal-body">
+                    <form id="frmViewDetails">
+                        <div class="row ">
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:108px;" for="FirstName">First Name <span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="text" id="FirstName" tabindex="3" name="FirstName" class="form-control input" required data-parsley-maxlength="255" data-parsley-errors-container="#err-FirstName" autocomplete="off">
+                                </div>
+                                <div id="err-FirstName"></div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:108px;" for="LastName">Last Name <span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="text" id="LastName" tabindex="4" name="LastName" class="form-control input" required data-parsley-maxlength="255" data-parsley-errors-container="#err-LastName" autocomplete="off">
+                                </div>
+                                <div id="err-LastName"></div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:108px;" for="MiddleName">Middle Name </label>
+                                    </div>
+                                    <input type="text" id="MiddleName" tabindex="5" name="MiddleName" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                                </div>
+                                <div id="err-MiddleName"></div>
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:108px;" for="FirstName">Log in Date <span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="text" id="InDate" tabindex="3" name="InDate" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                                </div>
+                                <div id="err-FirstName"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:108px;" for="LastName">Log in Time <span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="text" id="InTime" tabindex="4" name="InTime" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:108px;" for="OutDate">Log out Date<span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="text" id="OutDate" tabindex="3" name="OutDate" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                                </div>
+                                <div id="err-FirstName"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:108px;" for="OutTime">Log out Time <span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="text" id="OutTime" tabindex="4" name="OutTime" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                                </div>
+                                <div id="err-LastName"></div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+ 
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"><span class="fa fa-times"></span> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    @Scripts.Render("~/UserLogs-JS")
+}
+

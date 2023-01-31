@@ -1,0 +1,556 @@
+﻿using Kedica.Areas.MasterMaintenance.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web.Mvc;
+
+namespace Kedica.Areas.MasterMaintenance.Controllers
+{
+    public class UserMasterController : Controller
+    {
+        Security ph = new Security();
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+
+        public ActionResult Index()
+        {
+            return View("UserMaster");
+        }
+        public ActionResult GetUserList()
+        {
+            List<mUser> data = new List<mUser>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.Text;
+                        cmdMySql.CommandText = "SELECT  * from mUser where IsDeleted = 0";
+                        cmdMySql.ExecuteNonQuery();
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new mUser
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    Username = sdr["UserName"].ToString(),
+                                    FirstName = sdr["FirstName"].ToString(),
+                                    LastName = sdr["LastName"].ToString(),
+                                });
+                            }
+
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.Message.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                                    x.Username.ToLower().Contains(searchValue.ToLower()) ||
+                                    x.FirstName.ToLower().Contains(searchValue.ToLower()) ||
+                                    x.LastName.ToLower().Contains(searchValue.ToLower())
+                                 ).ToList<mUser>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetSelect2Data()
+        {
+            ArrayList results = new ArrayList();
+            string val = Request.QueryString["q"];
+            string id = Request.QueryString["id"];
+            string text = Request.QueryString["text"];
+            string table = Request.QueryString["table"];
+            string db = Request.QueryString["db"];
+            string condition = Request.QueryString["condition"] == null ? "" : Request.QueryString["condition"];
+            string isDistict = Request.QueryString["isDistict"] == null ? "" : Request.QueryString["isDistict"];
+            string display = Request.QueryString["display"];
+            string addOptionVal = Request.QueryString["addOptionVal"];
+            string addOptionText = Request.QueryString["addOptionText"];
+
+            if (addOptionVal != null && display == "id&text")
+                results.Add(new { id = addOptionVal, text = addOptionText });
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings[db].ConnectionString.ToString()))
+
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.Text;
+                        if (isDistict != "")
+                        {
+                            cmdMySql.CommandText = "SELECT DISTINCT(" + id + ")," + text + " FROM [vUsers]";
+                            using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                            {
+                                while (sdr.Read())
+                                {
+                                    var desc = sdr[text].ToString();
+                                    var isDateTime = desc.Contains("12:00:00 AM");
+                                    if (isDateTime)
+                                    {
+                                        DateTime aDate = DateTime.Parse(desc);
+                                        desc = aDate.ToString("MM/dd/yyyy");
+                                    }
+
+                                    if (display == "id&text")
+                                        results.Add(new { id = sdr[id].ToString(), text = desc });
+
+                                    if (display == "id&id-text")
+                                        results.Add(new { id = sdr[id].ToString(), text = sdr[id].ToString() + "-" + desc });
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            cmdMySql.CommandText = "SELECT " + id + "," + text + " FROM [" + table + "] WHERE IsDeleted=0 " + condition + " AND ( " + id + " like '%" + val + "%' OR " + text + " like '%" + val + "%')";
+                            using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                            {
+                                while (sdr.Read())
+                                {
+                                    if (display == "id&text")
+                                        results.Add(new { id = sdr[id].ToString(), text = sdr[text].ToString() });
+                                    if (display == "id&id-text")
+                                        results.Add(new { id = sdr[id].ToString(), text = sdr[id].ToString() + "-" + sdr[text].ToString() });
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.Message.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { results }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult ValidateUsername(string Username)
+        {
+            bool isValid = true;
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.Text;
+                        cmdMySql.CommandText = "SELECT UserName FROM mUser WHERE IsDeleted=0 AND UserName='" + Username + "'";
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            if (sdr.HasRows)
+                                isValid = false;
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.Message.ToString(); ;
+                error = true;
+            }
+            if (error)
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            else
+            {
+                return Json(new { success = true, data = new { isValid = isValid } });
+            }
+        }
+        public ActionResult SaveUser(mUser User)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    int ReadAndWrite = 0;
+                    int CanDelete = 0;
+                    if (User.Role == "Administrator")
+                    {
+                        ReadAndWrite = 1;
+                        CanDelete = 1;
+                    }
+                    if (User.Role == "Encoder")
+                    {
+                        ReadAndWrite = 1;
+                        CanDelete = 0;
+                    }
+                    if (User.Role == "Viewer")
+                    {
+                        ReadAndWrite = 0;
+                        CanDelete = 0;
+                    }
+
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdMySql = conn.CreateCommand())
+                        {
+                            User.Password = ph.base64Encode(User.Password).ToString();
+
+                            cmdMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMySql.CommandText = "User_InsertUpdate";
+                            cmdMySql.Parameters.Clear();
+                            cmdMySql.Parameters.AddWithValue("@_ID", User.ID);
+                            cmdMySql.Parameters.AddWithValue("@_Username", User.Username);
+                            cmdMySql.Parameters.AddWithValue("@_Password", User.Password);
+                            cmdMySql.Parameters.AddWithValue("@_FirstName", User.FirstName);
+                            cmdMySql.Parameters.AddWithValue("@_LastName", User.LastName);
+                            cmdMySql.Parameters.AddWithValue("@_Role", User.Role);
+                            cmdMySql.Parameters.AddWithValue("@_ReadAndWrite", ReadAndWrite);
+                            //cmdMySql.Parameters.AddWithValue("@_CanDelete", CanDelete);
+                            cmdMySql.Parameters.AddWithValue("@_CreateID", Session["Username"]);
+                            MySqlParameter EndMsg = cmdMySql.Parameters.Add("@EndMsg", MySqlDbType.VarChar, 200);
+                            MySqlParameter ErrorMessage = cmdMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 200);
+                            MySqlParameter Error = cmdMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            EndMsg.Direction = ParameterDirection.Output;
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdMySql.ExecuteNonQuery();
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+
+                            endMsg = EndMsg.Value.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "User was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetUserDetails(string Username)
+        {
+            mUser userDetails = new mUser();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    string getUserMySql = "SELECT u.* FROM mUser as u WHERE u.IsDeleted = '0' AND UserName='" + Username + "'";
+                    using (MySqlCommand comm = new MySqlCommand(getUserMySql, conn))
+                    {
+                        MySqlDataReader reader = comm.ExecuteReader();
+                        if (!reader.Read())
+                            throw new InvalidOperationException("No records found.");
+
+                        userDetails.ID = Convert.ToInt32(reader["ID"]);
+                        userDetails.Username = reader["UserName"].ToString();
+                        userDetails.Password = ph.base64Decode(reader["Password"].ToString());
+                        userDetails.FirstName = reader["FirstName"].ToString();
+                        userDetails.LastName = reader["LastName"].ToString();
+                        userDetails.Role = reader["UserRole"].ToString();
+                        reader.Close();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { userData = userDetails } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteUser(string Username)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "User_Delete";
+
+                        cmdMySql.Parameters.Clear();
+                        cmdMySql.Parameters.AddWithValue("@_Username", Username);
+                        cmdMySql.Parameters.AddWithValue("@_UpdateID", Session["Username"]);
+
+                        MySqlParameter Error = cmdMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+                        MySqlParameter ErrorMessage = cmdMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+
+                        Error.Direction = ParameterDirection.Output;
+                        ErrorMessage.Direction = ParameterDirection.Output;
+
+                        cmdMySql.ExecuteNonQuery();
+
+                        error = Convert.ToBoolean(Error.Value);
+                        if (error)
+                            modelErrors.Add(ErrorMessage.Value.ToString());
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "User was successfully deleted." });
+
+        }
+        public ActionResult GetUserAccess(int ID)
+        {
+
+            ArrayList userMenuList = new ArrayList();
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "UserPageAccess_GetAccessList";
+                        cmdMySql.Parameters.Clear();
+                        cmdMySql.Parameters.AddWithValue("@_ID", ID);
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                //var userid = Session["UserID"].ToString();
+                                userMenuList.Add(new
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    GroupLabel = sdr["GroupLabel"].ToString(),
+                                    PageName = sdr["PageName"].ToString(),
+                                    PageLabel = sdr["PageLabel"].ToString(),
+                                    URL = sdr["URL"].ToString(),
+                                    HasSub = Convert.ToInt32(sdr["HasSub"]),
+                                    ParentMenu = sdr["ParentMenu"].ToString(),
+                                    ParentOrder = Convert.ToInt32(sdr["ParentOrder"]),
+                                    Order = Convert.ToInt32(sdr["Order"]),
+                                    Icon = sdr["Icon"].ToString(),
+                                    Status = sdr["Status"].ToString() == "" ? 0 : Convert.ToInt32(sdr["Status"]),
+                                    ReadAndWrite = sdr["ReadAndWrite"].ToString() == "" ? 0 : Convert.ToInt32(sdr["ReadAndWrite"]),
+                                    Delete = sdr["Delete"].ToString() == "" ? 0 : Convert.ToInt32(sdr["Delete"])
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = userMenuList }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveUserAccess(List<mUserPageAccess> userAccessList, string Role, int UserID)
+        {
+            string endMsg = " saved.";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        MySqlTransaction transaction;
+                        transaction = conn.BeginTransaction();
+                        try
+                        {
+                            foreach (mUserPageAccess userAccess in userAccessList)
+                            {
+                                using (MySqlCommand cmdMySql = conn.CreateCommand())
+                                {
+                                    cmdMySql.Connection = conn;
+                                    cmdMySql.Transaction = transaction;
+                                    cmdMySql.CommandType = CommandType.StoredProcedure;
+                                    cmdMySql.CommandText = "UserPageAccess_INSERT_UPDATE";
+
+                                    cmdMySql.Parameters.Clear();
+                                    cmdMySql.Parameters.AddWithValue("@_UserID", Convert.ToInt32(userAccess.UserID));
+                                    cmdMySql.Parameters.AddWithValue("@_PageID", userAccess.PageID);
+                                    cmdMySql.Parameters.AddWithValue("@_Status", userAccess.Status == true ? 1 : 0);
+                                    cmdMySql.Parameters.AddWithValue("@_ReadAndWrite_", userAccess.ReadAndWrite);
+                                    cmdMySql.Parameters.AddWithValue("@_Delete_", userAccess.Delete);
+                                    cmdMySql.Parameters.AddWithValue("@_CreateID", Session["ID"].ToString());
+                                    MySqlParameter ErrorMessage = cmdMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 200);
+                                    MySqlParameter Error = cmdMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                                    Error.Direction = ParameterDirection.Output;
+                                    ErrorMessage.Direction = ParameterDirection.Output;
+
+                                    cmdMySql.ExecuteNonQuery();
+
+                                    error = Convert.ToBoolean(Error.Value);
+                                    if (error)
+                                    {
+                                        modelErrors.Add(ErrorMessage.Value.ToString());
+                                        //throw new System.InvalidOperationException(ErrorMessage.Value.ToString());
+                                    }
+                                }
+                            }
+                            using (MySqlCommand cmdMySql = conn.CreateCommand())
+                            {
+                                cmdMySql.Connection = conn;
+                                cmdMySql.Transaction = transaction;
+                                cmdMySql.CommandType = CommandType.StoredProcedure;
+                                cmdMySql.CommandText = "UserPageAccess_UpdateUserRole";
+
+                                cmdMySql.Parameters.Clear();
+                                cmdMySql.Parameters.AddWithValue("@UserID", UserID);
+                                cmdMySql.Parameters.AddWithValue("@Role", Role);
+                                cmdMySql.Parameters.AddWithValue("@UpdateID", Session["Username"]);
+
+                                MySqlParameter Error = cmdMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+                                MySqlParameter ErrorMessage = cmdMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+
+                                Error.Direction = ParameterDirection.Output;
+                                ErrorMessage.Direction = ParameterDirection.Output;
+
+                                cmdMySql.ExecuteNonQuery();
+
+                                error = Convert.ToBoolean(Error.Value);
+                                if (error)
+                                    modelErrors.Add(ErrorMessage.Value.ToString());
+                            }
+                            transaction.Commit();
+                        }
+                        catch (Exception err)
+                        {
+                            if (err.InnerException != null)
+                                modelErrors.Add("An error occured: " + err.InnerException.ToString());
+                            else
+                                modelErrors.Add("An error occured: " + err.Message.ToString());
+                            error = true;
+                        }
+
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    if (err.InnerException != null)
+                        modelErrors.Add("An error occured: " + err.InnerException.ToString());
+                    else
+                        modelErrors.Add("An error occured: " + err.Message.ToString());
+                    error = true;
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+                return Json(new { success = true, msg = "User Page Access was successfully " + endMsg });
+        }
+    }
+}

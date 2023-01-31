@@ -1,0 +1,458 @@
+﻿"use strict";
+(function () {
+    const HoldOutputProcess = function () {
+        return new HoldOutputProcess.init();
+    }
+    HoldOutputProcess.init = function () {
+        $D.init.call(this);
+        this.$tblHoldOutput = "";
+        this.$TabValidation = "hold";
+        this.$HydrationID = 0;
+    };
+    HoldOutputProcess.prototype = {
+        drawDatatables: function () {
+            var self = this;
+            if (!$.fn.DataTable.isDataTable('#tblHoldOutput')) {
+                self.$tblHoldOutput = $('#tblHoldOutput').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    "searching": false,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 25,
+                    "ajax": {
+                        "url": "/Transaction/HoldOutput/GetHoldOutputList",
+                        "type": "POST",
+                        "data": function (d) {
+                            d.FilterData = self.jsonData;
+                            d.TabValidation = self.$TabValidation;
+                        },
+                        "datatype": "json",
+                    },
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        {
+                            title: "Transaction Date", data: "TransactionDate"
+                        },
+                        { title: "Process Code", data: "HydrationValue" },
+                        { title: "Mixer ID", data: "MachineName" },
+                        { title: "Cycle No", data: "Value" },
+                        {
+                            title: "Input Drum", data: "InputDrumValue", visible: false
+                        },
+                        {
+                            title: "Input WT", data: "InputWT", visible: false, render: function (data) {
+                                return parseFloat(data).toFixed(2)
+                            }
+                        },
+                        {
+                            title: "Output WT", data: "OutPutWT", render: function (data) {
+                                return parseFloat(data).toFixed(2)
+                            }
+                        },
+                        {
+                            title: "Output/Input", visible: false, data: "OIResult", render: function (data) {
+                                return parseFloat(data).toFixed(2)
+                            }
+                        },
+                        { title: "Fe Cl (Li)", visible: false, data: "ProcessTemplateData" },
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                });
+            }
+            return this;
+        },
+        ValidateDataList: function (datVal) {
+            var self = this;
+            self.jsonData = { ID: datVal };
+            self.formAction = '/Transaction/HoldOutput/GetHydrationData';
+            self.sendData().then(function () {
+                self.populateHydrationData(self.responseData.HydrationData);
+            });
+            return this;
+        },
+        populateHydrationData: function (hydrationData) {
+            var self = this;
+            $("#MixerNo").val(hydrationData[0].MachineName);
+            $("#Cycle").val(hydrationData[0].Value);
+            $("#FeCl").val(hydrationData[0].ProcessTemplateData);
+            $("#OutputWT").val(parseFloat(hydrationData[0].OutputWeight).toFixed(2));
+            self.validateIOData();
+            return this;
+        },
+        validateIOData: function () {
+            var self = this;
+            var inputdata = parseInt($("#InputWT").val() === "" ? 0 : $("#InputWT").val());
+            var outputdata = parseInt($("#OutputWT").val() === "" ? 0 : $("#OutputWT").val());
+            var TotalData = outputdata / inputdata;
+            $("#InputOutput").val(parseFloat(TotalData).toFixed(2));
+            return this;
+        },
+        cancelHoldOutputForm: function () {
+            var self = this;
+            self.clearFromData("frmHoldOutput");
+            $("#btnSaveHoldOutput .btnLabel").text(" Save");
+            $("#mdlHoldOutputTitle").text(" Create HoldOutput Process");
+            $("#mdlHoldOutput").modal("hide");
+            $("#MixerNo,#Cycle,#FeCl,#InputOutput,#InputWT,#OutputWT").attr("readonly", true);
+            $("#HoldOutputID").val(0);
+            self.$HydrationID = 0;
+            return this;
+        },
+        cancelHoldOutputTbl: function () {
+            var self = this;
+            $('#btnEditHoldOutput').attr("disabled", "disabled");
+            $('#btnDeleteHoldOutput').attr("disabled", "disabled");
+            $('#btnHoldOutputData').attr("disabled", "disabled");
+            $('#btnUnHoldOutputData').attr("disabled", "disabled");
+            return this;
+        },
+        saveHoldOutput: function (HoldOutputData) {
+            var self = this;
+            self.jsonData = { HoldOutput: HoldOutputData };
+            self.formAction = '/Transaction/HoldOutput/SaveHoldOutputProcess';
+            self.sendData().then(function () {
+                self.formData = $('#frmFilterHoldOutput').serializeArray();
+                self.setJsonData();
+                self.$tblHoldOutput.ajax.reload(null, false);
+                self.cancelHoldOutputTbl();
+                self.cancelHoldOutputForm();
+            });
+            return this;
+        },
+        editHoldOutput: function () {
+            var self = this;
+            self.holdoutputID = self.$tblHoldOutput.rows({ selected: true }).data()[0].ID;
+            self.jsonData = { ID: self.holdoutputID };
+            self.formAction = '/Transaction/HoldOutput/GetHoldoutDetails';
+            self.sendData().then(function () {
+                self.populateHoldOutputData(self.responseData.holdoutputData);
+            });
+            return this;
+        },
+        populateHoldOutputData: function (holdoutputData) {
+            var self = this;
+            $("#frmHoldOutput").parsley().reset();
+            $("#btnSaveHoldOutput .btnLabel").text(" Update");
+            $("#mdlHoldOutputTitle").text(" Edit HoldOutput Process");
+            var ProcessCodeNoOption = new Option(holdoutputData.HydrationValue, holdoutputData.HydrationID, true, true);
+            $('#ProcessCode').append(ProcessCodeNoOption).trigger('change');
+            var DrumIDNoOption = new Option(holdoutputData.InputDrumValue, holdoutputData.InputDrum, true, true);
+            $('#InputDrum').append(DrumIDNoOption).trigger('change');
+            $("#TransactionDate").val(holdoutputData.TransactionDate);
+            $("#InputDrum").val(parseInt(holdoutputData.InputDrum));
+            $("#InputWT").val(parseFloat(holdoutputData.InputWT).toFixed(2));
+            $("#OutputWT").val(parseFloat(holdoutputData.OutPutWT).toFixed(2));
+            $("#InputOutput").val(parseFloat(holdoutputData.OIResult).toFixed(2));
+            $("#HoldOutputID").val(parseInt(holdoutputData.ID));
+            self.$HydrationID = holdoutputData.HydrationID;
+            $("#mdlHoldOutput").modal('show');
+            return this;
+        },
+        deleteHoldOutput: function () {
+            var self = this;
+            self.holdoutputID = self.$tblHoldOutput.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/Transaction/HoldOutput/DeleteHoldout';
+            self.jsonData = { ID: self.holdoutputID };
+            self.sendData().then(function () {
+                self.formData = $('#frmFilterHoldOutput').serializeArray();
+                self.setJsonData();
+                self.$tblHoldOutput.ajax.reload(null, false);
+                self.cancelHoldOutputTbl();
+                self.cancelHoldOutputForm();
+            });
+            return this;
+        },
+        unholdData: function () {
+            var self = this;
+            self.holdoutputID = self.$tblHoldOutput.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/Transaction/HoldOutput/UnHoldData';
+            self.jsonData = { ID: self.holdoutputID };
+            self.sendData().then(function () {
+                self.formData = $('#frmFilterHoldOutput').serializeArray();
+                self.setJsonData();
+                self.$tblHoldOutput.ajax.reload(null, false);
+                self.cancelHoldOutputTbl();
+                self.cancelHoldOutputForm();
+            });
+            return this;
+        },
+        holdData: function () {
+            var self = this;
+            self.holdoutputID = self.$tblHoldOutput.rows({ selected: true }).data()[0].ID;
+            self.formAction = '/Transaction/HoldOutput/HoldData';
+            self.jsonData = { ID: self.holdoutputID };
+            self.sendData().then(function () {
+                self.formData = $('#frmFilterHoldOutput').serializeArray();
+                self.setJsonData();
+                self.$tblHoldOutput.ajax.reload(null, false);
+                self.cancelHoldOutputTbl();
+                self.cancelHoldOutputForm();
+            });
+            return this;
+        },
+        ValidateInputData: function (datVal) {
+            var self = this;
+            self.jsonData = { DrumID: datVal, HydrationID: self.$HydrationID };
+            self.formAction = '/Transaction/HoldOutput/GetHydrationInputData';
+            self.sendData().then(function () {
+                self.populateInputData(self.responseData.InputData);
+            });
+            return this;
+        },
+        populateInputData: function (hydrationData) {
+            var self = this;
+            $("#InputWT").val(parseFloat(hydrationData[0].InputWeight).toFixed(2));
+            self.validateIOData();
+            return this;
+        },
+    };
+    HoldOutputProcess.init.prototype = $.extend(HoldOutputProcess.prototype, $D.init.prototype);
+    HoldOutputProcess.init.prototype = HoldOutputProcess.prototype;
+
+    $(document).ready(function () {
+        var HoldOutput = HoldOutputProcess();
+        HoldOutput.formData = $('#frmFilterHoldOutput').serializeArray();
+        HoldOutput.setJsonData();
+        HoldOutput.drawDatatables();
+        $("#btnAddHoldOutput").click(function () {
+            $("#mdlHoldOutput").modal("show");
+        });
+        $("#mdlHoldOutput").on('shown.bs.modal', function () {
+            $('#ProcessCode').select2({
+                ajax: {
+                    url: "/General/MySQLGetSelect2Data",
+                    data: function (params) {
+                        var d = {
+                            q: params.term,
+                            id: 'ID',
+                            text: 'ProcessCode',
+                            table: 'tHydration',
+                            db: 'SHIN-ETSU-MYSQL',
+                            query: "SELECT ID,ProcessCode FROM tHydration where IsCompleted = 1 and IsDeleted = 0",
+                            display: 'id&text',
+                        }
+                        return d;
+                    },
+                },
+                placeholder: "--Please Select--",
+                allowClear: true,
+            });
+            $('#InputDrum').select2({
+                ajax: {
+                    url: "/General/MySQLGetSelect2Data",
+                    data: function (params) {
+                        var d = {
+                            q: params.term,
+                            id: 'ID',
+                            text: 'Process',
+                            table: 'mOperation',
+                            db: 'SHIN-ETSU-MYSQL',
+                            query: "SELECT ID,`Process` FROM mOperation where `Process` like 'Wet Sludge%' and IsDeleted = 0",
+                            display: 'id&text',
+                        }
+                        return d;
+                    },
+                },
+                placeholder: "--Please Select--",
+                allowClear: true,
+            });
+        });
+        $("#ProcessCode").on('change', function () {
+            var datVal = $(this).val();
+            HoldOutput.$HydrationID = datVal;
+            HoldOutput.ValidateDataList(datVal);
+        });
+        $("#btnCancelHoldOutput,#btnUpClosedMdl").click(function () {
+            HoldOutput.cancelHoldOutputForm();
+            CUI.setDatatableMaxHeight();
+        });
+        $("#btnSaveHoldOutput").click(function () {
+            $("#frmHoldOutput").submit();
+        });
+        $("#frmHoldOutput").submit(function (e) {
+            e.preventDefault();
+            var arrHoldOutput = "";
+
+            var HydrationID = $("#ProcessCode").val();
+            var inputWT = $("#InputWT").val();
+            var outputWT = $("#OutputWT").val();
+            var ioWT = $("#InputOutput").val();
+            var drumID = $("#InputDrum").val();
+            var transactionDate = $("#TransactionDate").val();
+            var rowID = $("#HoldOutputID").val();
+
+            arrHoldOutput = {
+                ID: rowID,
+                TransactionDate: transactionDate,
+                HydrationID: HydrationID,
+                InputDrum: drumID,
+                InputWT: inputWT,
+                OutPutWT: outputWT,
+                OIResult: ioWT
+            };
+            var mode = $("#btnSaveHoldOutput > span.btnLabel").text().toLowerCase();
+            HoldOutput.msg = "Are you sure you want to " + mode + " this HoldOutput Process?";
+            HoldOutput.confirmAction().then(function (approve) {
+                if (approve)
+                    HoldOutput.saveHoldOutput(arrHoldOutput);
+            });
+        });
+        $("#TransactionDate,#FilterTransactionDate").datepicker({ todayHighlight: true, autoclose: true, format: "yyyy-mm-dd" });
+        $('#btnEditHoldOutput').click(function () {
+            HoldOutput.editHoldOutput();
+        });
+        $("#btnDeleteHoldOutput").click(function () {
+            HoldOutput.msg = "Are you sure you want to delete this HoldOutput Process?";
+            HoldOutput.confirmAction().then(function (approve) {
+                if (approve)
+                    HoldOutput.deleteHoldOutput();
+            });
+        });
+        $('#FilterProcessCode').select2({
+            ajax: {
+                url: "/General/MySQLGetSelect2Data",
+                data: function (params) {
+                    var d = {
+                        q: params.term,
+                        id: 'ID',
+                        text: 'ProcessCode',
+                        table: 'tHydration',
+                        db: 'SHIN-ETSU-MYSQL',
+                        query: "SELECT ID,ProcessCode FROM tHydration where IsCompleted = 1 and IsDeleted = 0",
+                        display: 'id&text',
+                    }
+                    return d;
+                },
+            },
+            placeholder: "--Please Select--",
+            allowClear: true,
+        });
+        $('#FilterMixerNo').select2({
+            ajax: {
+                url: "/General/MySQLGetSelect2Data",
+                data: function (params) {
+                    var d = {
+                        q: params.term,
+                        id: 'ID',
+                        text: 'MachineName',
+                        table: 'mMachine',
+                        db: 'SHIN-ETSU-MYSQL',
+                        query: "SELECT ID,MachineName FROM mMachine where IsDeleted = 0",
+                        display: 'id&text',
+                    }
+                    return d;
+                },
+            },
+            placeholder: "--Please Select--",
+            allowClear: true,
+        });
+        $('#FilterCycle').select2({
+            ajax: {
+                url: "/General/MySQLGetSelect2Data",
+                data: function (params) {
+                    var d = {
+                        q: params.term,
+                        id: 'ID',
+                        text: 'Value',
+                        table: 'mGeneral',
+                        db: 'SHIN-ETSU-MYSQL',
+                        query: "SELECT ID,`Value` FROM mGeneral where TypeID = 1 and IsDeleted = 0",
+                        display: 'id&text',
+                    }
+                    return d;
+                },
+            },
+            placeholder: "--Please Select--",
+            allowClear: true,
+        });
+        $('#FilterInputDrum').select2({
+            ajax: {
+                url: "/General/MySQLGetSelect2Data",
+                data: function (params) {
+                    var d = {
+                        q: params.term,
+                        id: 'ID',
+                        text: 'Process',
+                        table: 'mOperation',
+                        db: 'SHIN-ETSU-MYSQL',
+                        query: "SELECT ID,`Process` FROM mOperation where `Process` like 'Wet Sludge%' and IsDeleted = 0",
+                        display: 'id&text',
+                    }
+                    return d;
+                },
+            },
+            placeholder: "--Please Select--",
+            allowClear: true,
+        });
+        $("#frmFilterHoldOutput").submit(function (e) {
+            e.preventDefault();
+            HoldOutput.formData = $('#frmFilterHoldOutput').serializeArray();
+            HoldOutput.setJsonData();
+            HoldOutput.$tblHoldOutput.ajax.reload(null, false);
+        });
+        $("#btnCancelDataHoldOutput").click(function () {
+            HoldOutput.clearFromData("frmFilterHoldOutput");
+            HoldOutput.formData = $('#frmFilterHoldOutput').serializeArray();
+            HoldOutput.setJsonData();
+            HoldOutput.$tblHoldOutput.ajax.reload(null, false);
+        });
+        $("#btnHoldOutputData").click(function () {
+            HoldOutput.msg = "Are you sure you want to Un Hold this HoldOutput Process?";
+            HoldOutput.confirmAction().then(function (approve) {
+                if (approve)
+                    HoldOutput.unholdData();
+            });
+        });
+        $("#OnHoldTabValid").click(function () {
+            HoldOutput.$TabValidation = "hold";
+            HoldOutput.formData = $('#frmFilterHoldOutput').serializeArray();
+            HoldOutput.setJsonData();
+            HoldOutput.$tblHoldOutput.ajax.reload(null, false);
+        });
+        $("#PrevHoldTabValid").click(function () {
+            HoldOutput.$TabValidation = "Prevhold";
+            HoldOutput.formData = $('#frmFilterHoldOutput').serializeArray();
+            HoldOutput.setJsonData();
+            HoldOutput.$tblHoldOutput.ajax.reload(null, false);
+        });
+        $("#btnUnHoldOutputData").click(function () {
+            HoldOutput.msg = "Are you sure you want to Hold this HoldOutput Process?";
+            HoldOutput.confirmAction().then(function (approve) {
+                if (approve)
+                    HoldOutput.holdData();
+            });
+        });
+        $("#InputDrum").on('change', function () {
+            var dataVal = $(this).val();
+            HoldOutput.ValidateInputData(dataVal)
+        });
+        HoldOutput.$tblHoldOutput.on('draw.dt', function () {
+            CUI.dataTableID = "#tblHoldOutput";
+            CUI.setDatatableMaxHeightFixed();
+        });
+        HoldOutput.$tblHoldOutput.on('select', function (e, dt, type, indexes) {
+            if (HoldOutput.$TabValidation === "hold") {
+                $('#btnEditHoldOutput').removeAttr("disabled");
+                $('#btnDeleteHoldOutput').removeAttr("disabled");
+                $('#btnHoldOutputData').removeAttr("disabled");
+            }
+            else {
+                $('#btnUnHoldOutputData').removeAttr("disabled");
+            }
+        });
+        HoldOutput.$tblHoldOutput.on('deselect', function (e, dt, type, indexes) {
+            if (HoldOutput.$TabValidation === "hold") {
+                $('#btnEditHoldOutput').attr("disabled", "disabled");
+                $('#btnDeleteHoldOutput').attr("disabled", "disabled");
+                $('#btnHoldOutputData').attr("disabled", "disabled");
+            }
+            else {
+                $('#btnUnHoldOutputData').attr("disabled", "disabled");
+            }
+        });
+    });
+})();

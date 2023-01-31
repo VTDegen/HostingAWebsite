@@ -1,0 +1,19 @@
+﻿namespace Kedica.Areas.Transaction.Models
+{
+    public class tHoldOutput
+    {
+        public int ID { get; set; }
+        public int HydrationID { get; set; }
+        public string HydrationValue { get; set; }
+        public string TransactionDate { get; set; }
+        public string MachineName { get; set; }
+        public string Value { get; set; }
+        public int InputDrum { get; set; }
+        public string InputDrumValue { get; set; }
+        public decimal InputWT { get; set; }
+        public decimal OutPutWT { get; set; }
+        public decimal OIResult { get; set; }
+        public string ProcessTemplateData { get; set; }
+
+    }
+}

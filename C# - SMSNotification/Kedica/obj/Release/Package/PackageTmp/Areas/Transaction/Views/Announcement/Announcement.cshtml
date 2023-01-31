@@ -1,0 +1,54 @@
+﻿
+@{
+    ViewBag.Title = "Announcement";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/Announcement-CSS")
+}
+<style>
+    .timeline .timeline-content {
+        max-width: 100% !important;
+    }
+    .timeline .timeline-body {
+        margin-left: 4% !important;
+        margin-right: 3% !important;
+    }
+</style>
+<div id="content" class="app-content p-0" style="margin-left: 0px !important">
+    <div class="profile">
+        <div class="profile-header">
+            <div class="profile-header-cover"></div>
+
+            <div class="profile-header-content">
+                <div class="profile-header-img">
+                    <img src="/Content/assets/img/userpic.png" alt="">
+                </div>
+
+                <div class="profile-header-info">
+                    <h4 class="mt-0 mb-1"> @Session["Name"].ToString()</h4>
+                    <p class="mb-2">@Session["UserRole"].ToString()</p>
+                    <a href="#" class="btn btn-xs btn-yellow">Announcement</a>
+                </div>
+            </div>
+
+            <ul class="profile-header-tab nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation"><a href="#" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab"></a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="tab-content p-0">
+            <div class="tab-pane fade show active" id="profile-post" role="tabpanel">
+                <div class="timeline" id="PopulateTimeLine">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    @Scripts.Render("~/Announcement-JS")
+}

@@ -1,0 +1,1069 @@
+﻿using Kedica.Areas.Transaction.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Web.Mvc;
+
+namespace Kedica.Areas.Transaction.Controllers
+{
+    public class DailyTargetVsActualController : Controller
+    {
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+        // GET: Transaction/DailyTargetVsActual
+        public ActionResult Index()
+        {
+            return View("DailyTargetVsActual");
+        }
+        public ActionResult SaveMachineTarget(List<tDailyTargetVsActual> MachineTargetList)
+        {
+            List<tDailyTargetVsActual> DBMachineTargetList = new List<tDailyTargetVsActual>();
+            List<tDailyTargetVsActual> DuplicateDBMachineTargetList = new List<tDailyTargetVsActual>();
+            List<tDailyTargetVsActual> SaveDBMachineTargetList = new List<tDailyTargetVsActual>();
+            List<tDailyTargetVsActual> DeleteMachineTargetList = new List<tDailyTargetVsActual>();
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                    {
+                        conn.Open();
+                        MySqlTransaction transaction;
+
+                        using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                        {
+                            cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMyMySql.CommandText = "DailyTarget_MachineTarget_GetListed";
+                            cmdMyMySql.Parameters.Clear();
+                            using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                            {
+                                while (sdr.Read())
+                                {
+                                    DBMachineTargetList.Add(new tDailyTargetVsActual
+                                    {
+                                        ID = Convert.ToInt32(sdr["ID"]),
+                                        TargetDate = sdr["TargetDate"].ToString(),
+                                        TargetQty = Convert.ToInt32(sdr["TargetQty"]),
+                                        MachineID = Convert.ToInt32(sdr["MachineID"])
+                                    });
+                                }
+                            }
+                        }
+                        conn.Close();
+                        if (DBMachineTargetList.Count == 0)
+                        {
+                            int InsertCounter = 0;
+                            for (int i = 0; i < MachineTargetList.Count; i++)
+                            {
+                                SaveDBMachineTargetList.Add(new tDailyTargetVsActual
+                                {
+                                    TargetDate = MachineTargetList[InsertCounter].TargetDate,
+                                    TargetQty = Convert.ToInt32(MachineTargetList[InsertCounter].TargetQty),
+                                    MachineID = Convert.ToInt32(MachineTargetList[InsertCounter].MachineID)
+                                });
+                                InsertCounter++;
+                            }
+                        }
+                        else
+                        {
+                            int OuterCounter = 0;
+                            int InnerCounter = 0;
+                            bool isDuplicate = false;
+                            for (int outer = 0; outer < MachineTargetList.Count; outer++)
+                            {
+                                InnerCounter = 0;
+                                for (int inner = 0; inner < DBMachineTargetList.Count; inner++)
+                                {
+                                    if (MachineTargetList[OuterCounter].TargetDate == DBMachineTargetList[InnerCounter].TargetDate)
+                                    {
+                                        if (MachineTargetList[OuterCounter].MachineID == DBMachineTargetList[InnerCounter].MachineID)
+                                        {
+                                            if (MachineTargetList[OuterCounter].TargetQty == DBMachineTargetList[InnerCounter].TargetQty)
+                                            {
+                                                isDuplicate = true;
+                                            }
+                                            else
+                                            {
+                                                DeleteMachineTargetList.Add(new tDailyTargetVsActual
+                                                {
+                                                    ID = Convert.ToInt32(DBMachineTargetList[InnerCounter].ID)
+                                                });
+                                                isDuplicate = false;
+
+                                            }
+                                        }
+                                    }
+
+                                    InnerCounter++;
+                                }
+                                if (isDuplicate)
+                                {
+                                    isDuplicate = false;
+                                    DuplicateDBMachineTargetList.Add(new tDailyTargetVsActual
+                                    {
+                                        TargetDate = MachineTargetList[OuterCounter].TargetDate,
+                                        TargetQty = Convert.ToInt32(MachineTargetList[OuterCounter].TargetQty),
+                                        MachineID = Convert.ToInt32(MachineTargetList[OuterCounter].MachineID)
+                                    });
+
+                                }
+                                else
+                                {
+
+                                    SaveDBMachineTargetList.Add(new tDailyTargetVsActual
+                                    {
+                                        TargetDate = MachineTargetList[OuterCounter].TargetDate,
+                                        TargetQty = Convert.ToInt32(MachineTargetList[OuterCounter].TargetQty),
+                                        MachineID = Convert.ToInt32(MachineTargetList[OuterCounter].MachineID)
+                                    });
+                                }
+                                OuterCounter++;
+                            }
+                        }
+
+                        if (SaveDBMachineTargetList.Count != 0)
+                        {
+
+                            StringBuilder MachineTargetCMD = new StringBuilder("INSERT INTO tMachineTarget ( MachineID, TargetDate, TargetQty, CreateDate, CreateID, UpdateDate, UpdateID) VALUES ");
+                            StringBuilder DeleteMachineTargetCMD = new StringBuilder("DELETE FROM tMachineTarget WHERE (ID) IN (");
+                            List<string> Rows = new List<string>();
+                            List<string> DelRows = new List<string>();
+                            int dataCounter = 0;
+                            int delCounter = 0;
+                            for (int idel = 0; idel < DeleteMachineTargetList.Count; idel++)
+                            {
+                                DelRows.Add(string.Format("('{0}')"
+                                       , MySqlHelper.EscapeString(Convert.ToInt32(DeleteMachineTargetList[delCounter].ID).ToString())
+                                       ));
+                                delCounter++;
+                            }
+
+                            for (int i = 0; i < SaveDBMachineTargetList.Count; i++)
+                            {
+                                Rows.Add(string.Format("('{0}','{1}','{2}','{3}','{4}','{5}','{6}')"
+                                       , MySqlHelper.EscapeString(Convert.ToInt32(SaveDBMachineTargetList[dataCounter].MachineID).ToString())
+                                       , MySqlHelper.EscapeString(SaveDBMachineTargetList[dataCounter].TargetDate)
+                                       , MySqlHelper.EscapeString(Convert.ToInt32(SaveDBMachineTargetList[dataCounter].TargetQty).ToString())
+                                       , MySqlHelper.EscapeString(Convert.ToDateTime(DateTime.Now).ToString("yyyy-MM-dd hh:mm:ss"))
+                                       , MySqlHelper.EscapeString(Session["Username"].ToString())
+                                       , MySqlHelper.EscapeString(Convert.ToDateTime(DateTime.Now).ToString("yyyy-MM-dd hh:mm:ss"))
+                                       , MySqlHelper.EscapeString(Session["Username"].ToString())
+                                       ));
+                                dataCounter++;
+                            }
+                            MachineTargetCMD.Append(string.Join(",", Rows));
+                            MachineTargetCMD.Append(";");
+
+                            DeleteMachineTargetCMD.Append(string.Join(",", DelRows));
+                            DeleteMachineTargetCMD.Append(");");
+                            conn.Open();
+                            transaction = conn.BeginTransaction();
+                            using (MySqlCommand myCmd = new MySqlCommand(MachineTargetCMD.ToString(), conn))
+                            {
+                                try
+                                {
+
+                                    myCmd.CommandType = CommandType.Text;
+                                    myCmd.ExecuteNonQuery();
+                                }
+                                catch (Exception err)
+                                {
+                                    conn.Close();
+                                    transaction.Rollback();
+                                    string errmsg = "";
+                                    if (err.InnerException != null)
+                                        errmsg = ("An error occured: " + err.InnerException.ToString());
+                                    else
+                                        errmsg = ("An error occured: " + err.Message.ToString());
+                                    error = true;
+                                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                                }
+                            }
+                            transaction.Commit();
+                            conn.Close();
+                            if (DeleteMachineTargetList.Count != 0)
+                            {
+                                conn.Open();
+                                transaction = conn.BeginTransaction();
+                                using (MySqlCommand myCmd = new MySqlCommand(DeleteMachineTargetCMD.ToString(), conn))
+                                {
+                                    try
+                                    {
+                                        myCmd.CommandType = CommandType.Text;
+                                        myCmd.ExecuteNonQuery();
+                                    }
+                                    catch (Exception err)
+                                    {
+                                        conn.Close();
+                                        transaction.Rollback();
+                                        string errmsg = "";
+                                        if (err.InnerException != null)
+                                            errmsg = ("An error occured: " + err.InnerException.ToString());
+                                        else
+                                            errmsg = ("An error occured: " + err.Message.ToString());
+                                        error = true;
+                                        return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                                    }
+                                }
+                                transaction.Commit();
+                                conn.Close();
+                            }
+
+                            return Json(new { success = true, msg = "Machine Target was successfully " + endMsg });
+                        }
+                    }
+
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Machine Target was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetMachineTargetList()
+        {
+            List<tDailyTargetVsActual> data = new List<tDailyTargetVsActual>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            string FilterFromDate = Request["FilterData[FilterFromDate]"];
+            string FilterToDate = Request["FilterData[FilterToDate]"];
+            string FilterMachineID = Request["FilterData[FilterMachineID]"];
+            string TabValidate = Request["TabValidation"];
+            string DailyCondition = Request["DailyCondition"];
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "DailyTarget_MachineTarget_GetList";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_FilterFromDate", FilterFromDate == null ? "" : TabValidate == "monthly" ? FilterFromDate + "-01" : FilterFromDate);
+                        cmdMyMySql.Parameters.AddWithValue("@_FilterToDate", FilterToDate == null ? "" : TabValidate == "monthly" ? FilterToDate + "-01" : FilterToDate);
+                        cmdMyMySql.Parameters.AddWithValue("@_FilterMachineID", FilterMachineID == null ? "" : FilterMachineID);
+                        cmdMyMySql.Parameters.AddWithValue("@_TabValidate", TabValidate);
+                        cmdMyMySql.Parameters.AddWithValue("@_DailyCondition", DailyCondition);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                if (TabValidate == "machine")
+                                {
+                                    data.Add(new tDailyTargetVsActual
+                                    {
+                                        ID = Convert.ToInt32(sdr["ID"]),
+                                        TargetDate = sdr["TargetDate"].ToString(),
+                                        TargetQty = Convert.ToInt32(sdr["TargetQty"]),
+                                        MachineIDValue = sdr["MachineIDValue"].ToString()
+                                    });
+                                }
+                                else if (TabValidate == "daily")
+                                {
+                                    data.Add(new tDailyTargetVsActual
+                                    {
+                                        ID = Convert.ToInt32(sdr["ID"]),
+                                        TargetDate = sdr["ProcessDate"].ToString(),
+                                        MachineName = sdr["MachineName"].ToString(),
+                                        ActualQty = Convert.ToInt32(sdr["OutputWeight"]),
+                                        DrumQty = Convert.ToInt32(sdr["DrumInput"]),
+                                        FECLQty = Convert.ToInt32(sdr["FECL"]),
+                                        TargetQty = Convert.ToInt32(sdr["TargetQty"]),
+                                        NoCycleQty = Convert.ToInt32(sdr["CycleID"])
+                                    });
+                                }
+                                else if (TabValidate == "weekly")
+                                {
+                                    data.Add(new tDailyTargetVsActual
+                                    {
+                                        ID = Convert.ToInt32(sdr["ID"]),
+                                        TargetDate = sdr["ProcessDate"].ToString(),
+                                        MachineName = sdr["MachineName"].ToString(),
+                                        ActualQty = Convert.ToInt32(sdr["Actual"]),
+                                        TargetQty = Convert.ToInt32(sdr["TargetQty"]),
+                                    });
+                                }
+                                else if (TabValidate == "monthly")
+                                {
+                                    data.Add(new tDailyTargetVsActual
+                                    {
+                                        ID = Convert.ToInt32(sdr["ID"]),
+                                        TargetDate = sdr["ProcessDate"].ToString(),
+                                        MachineName = sdr["MachineName"].ToString(),
+                                        ActualQty = Convert.ToInt32(sdr["Actual"]),
+                                        TargetQty = Convert.ToInt32(sdr["TargetQty"]),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.TargetQty.ToString().Contains(searchValue.ToLower()) ||
+                    x.MachineID.ToString().Contains(searchValue.ToLower()) ||
+                    x.TargetDate.ToString().Contains(searchValue.ToLower())
+                ).ToList<tDailyTargetVsActual>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<tDailyTargetVsActual>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteMachineTarget(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "DailyTarget_MachineTarget_Delete";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_MachineTarget", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                        MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                        Error.Direction = ParameterDirection.Output;
+                        ErrorMessage.Direction = ParameterDirection.Output;
+
+                        cmdMyMySql.ExecuteNonQuery();
+
+                        error = Convert.ToBoolean(Error.Value);
+                        if (error)
+                        {
+                            modelErrors.Add(ErrorMessage.Value.ToString());
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Machine Target was successfully deleted." });
+
+        }
+        public ActionResult SaveWeeklyList(List<WeeklyTarget> WeeklyData)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                {
+                    conn.Open();
+                    MySqlTransaction transaction;
+                    transaction = conn.BeginTransaction();
+                    try
+                    {
+                        StringBuilder WeeklyCMD = new StringBuilder("INSERT INTO tWeeklySetting ( GrountCount, DateFrom, DateTo, CreateDate, CreateID,  UpdateDate, UpdateID ) VALUES ");
+                        List<string> Rows = new List<string>();
+                        int WeeklyCounter = 0;
+                        for (int idel = 0; idel < WeeklyData.Count; idel++)
+                        {
+                            Rows.Add(string.Format("('{0}','{1}','{2}','{3}','{4}','{5}','{6}')"
+                                  , MySqlHelper.EscapeString(Convert.ToInt32(WeeklyData[WeeklyCounter].GroupCountData).ToString())
+                                  , MySqlHelper.EscapeString(WeeklyData[WeeklyCounter].DateFrom)
+                                  , MySqlHelper.EscapeString(WeeklyData[WeeklyCounter].DateTo)
+                                  , MySqlHelper.EscapeString(Convert.ToDateTime(DateTime.Now).ToString("yyyy-MM-dd hh:mm:ss"))
+                                  , MySqlHelper.EscapeString(Session["Username"].ToString())
+                                  , MySqlHelper.EscapeString(Convert.ToDateTime(DateTime.Now).ToString("yyyy-MM-dd hh:mm:ss"))
+                                  , MySqlHelper.EscapeString(Session["Username"].ToString())
+                                  ));
+                            WeeklyCounter++;
+                        }
+                        WeeklyCMD.Append(string.Join(",", Rows));
+                        WeeklyCMD.Append(";");
+                        using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                        {
+                            cmdMyMySql.CommandType = CommandType.Text;
+                            cmdMyMySql.CommandText = "TRUNCATE tWeeklySetting";
+                            cmdMyMySql.ExecuteNonQuery();
+                        }
+                        transaction.Commit();
+                        conn.Close();
+                        conn.Open();
+                        transaction = conn.BeginTransaction();
+                        using (MySqlCommand myCmd = new MySqlCommand(WeeklyCMD.ToString(), conn))
+                        {
+                            try
+                            {
+                                myCmd.CommandType = CommandType.Text;
+                                myCmd.ExecuteNonQuery();
+                            }
+                            catch (Exception err)
+                            {
+                                conn.Close();
+                                transaction.Rollback();
+                                string errmsg = "";
+                                if (err.InnerException != null)
+                                    errmsg = ("An error occured: " + err.InnerException.ToString());
+                                else
+                                    errmsg = ("An error occured: " + err.Message.ToString());
+                                error = true;
+                                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                            }
+                        }
+                        transaction.Commit();
+                        conn.Close();
+
+                    }
+                    catch (Exception err)
+                    {
+                        transaction.Rollback();
+                        string errmsg;
+                        if (err.InnerException != null)
+                            errmsg = "Error: " + err.InnerException.ToString();
+                        else
+                            errmsg = "Error: " + err.Message.ToString();
+
+                        return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                    }
+
+                }
+            }
+            catch (Exception err)
+            {
+                if (err.InnerException != null)
+                    modelErrors.Add("An error occured: " + err.InnerException.ToString());
+                else
+                    modelErrors.Add("An error occured: " + err.Message.ToString());
+                error = true;
+            }
+            return Json(new { success = true, msg = "Weekly Setting was successfully saved" }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetWeeklySettingList()
+        {
+            ArrayList WeeklyDetails = new ArrayList();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.Text;
+                        cmdMyMySql.CommandText = "SELECT ID, GrountCount, date_format(DateFrom,'%Y-%m-%d') as DateFrom ,date_format(DateTo,'%Y-%m-%d') as DateTo , concat(date_format(DateFrom,'%b-%d-%y'),' - ',date_format(DateTo,'%b-%d-%y')) as WeeklySetting FROM tWeeklySetting";
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                WeeklyDetails.Add(new
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    GrountCount = Convert.ToInt32(sdr["GrountCount"]),
+                                    DateFrom = sdr["DateFrom"].ToString(),
+                                    WeeklySetting = sdr["WeeklySetting"].ToString(),
+                                    DateTo = sdr["DateTo"].ToString()
+                                });
+
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    weeklyDetails = WeeklyDetails
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GenerateActualData(string ListData, string ListDataValue, string HeaderListValue, string TabType, string MainListData)
+        {
+            try
+            {
+                List<GenerateWeeklyData> ListData_ = new List<GenerateWeeklyData>();
+                List<GenerateWeeklyData> ListDataValue_ = new List<GenerateWeeklyData>();
+                List<GenerateWeeklyData> HeaderListValue_ = new List<GenerateWeeklyData>();
+                List<GenerateWeeklyData> MainListValue_ = new List<GenerateWeeklyData>();
+                if (TabType == "weekly" || TabType == "monthly")
+                {
+                    string[] TempListData = ListData.Split(':');
+                    string[] TempListDataValue = ListDataValue.Split(':');
+                    string[] TempHeaderListValue = HeaderListValue.Split(':');
+
+                    for (int TempListDatai = 0; TempListDatai < TempListData.Length - 1; TempListDatai++)
+                    {
+                        string TempInnerData = TempListData[TempListDatai];
+                        string[] innerTempListData = TempInnerData.Split(',');
+                        ListData_.Add(new GenerateWeeklyData
+                        {
+                            Achievement = innerTempListData[0],
+                            Actual = innerTempListData[1],
+                            Date = innerTempListData[2],
+                            MixerData = innerTempListData[3],
+                            Target = innerTempListData[4]
+                        });
+                    }
+                    for (int TempListDataValuei = 0; TempListDataValuei < TempListDataValue.Length - 1; TempListDataValuei++)
+                    {
+                        string TempInnerData = TempListDataValue[TempListDataValuei];
+                        string[] innerTempListData = TempInnerData.Split(',');
+                        ListDataValue_.Add(new GenerateWeeklyData
+                        {
+                            Date = innerTempListData[0],
+                            MixerData = innerTempListData[1],
+                            MixerName = innerTempListData[2]
+                        });
+                    }
+                    for (int TempHeaderListValuei = 0; TempHeaderListValuei < TempHeaderListValue.Length - 1; TempHeaderListValuei++)
+                    {
+                        string TempInnerData = TempHeaderListValue[TempHeaderListValuei];
+                        string[] innerTempListData = TempInnerData.Split(',');
+                        HeaderListValue_.Add(new GenerateWeeklyData
+                        {
+                            MixerName = innerTempListData[0]
+                        });
+                    }
+                }
+                else if (TabType == "machine")
+                {
+                    string[] TempMainListData = MainListData.Split(':');
+                    for (int TempListDatai = 0; TempListDatai < TempMainListData.Length - 1; TempListDatai++)
+                    {
+                        string TempInnerData = TempMainListData[TempListDatai];
+                        string[] innerTempListData = TempInnerData.Split(',');
+                        MainListValue_.Add(new GenerateWeeklyData
+                        {
+                            Date = innerTempListData[0],
+                            MixerName = innerTempListData[1],
+                            Target = innerTempListData[2]
+                        });
+                    }
+                }
+                else if (TabType == "daily")
+                {
+                    string[] TempListData = ListData.Split(':');
+                    string[] TempHeaderListValue = HeaderListValue.Split(':');
+
+                    for (int TempListDatai = 0; TempListDatai < TempListData.Length - 1; TempListDatai++)
+                    {
+                        string TempInnerData = TempListData[TempListDatai];
+                        string[] innerTempListData = TempInnerData.Split(',');
+                        ListData_.Add(new GenerateWeeklyData
+                        {
+                            Target = innerTempListData[0],
+                            Actual = innerTempListData[1],
+                            Date = innerTempListData[2],
+                            Achievement = innerTempListData[3],
+                            MixerName = innerTempListData[4],
+                        });
+                    }
+                    for (int TempHeaderListValuei = 0; TempHeaderListValuei < TempHeaderListValue.Length - 1; TempHeaderListValuei++)
+                    {
+                        string TempInnerData = TempHeaderListValue[TempHeaderListValuei];
+                        string[] innerTempListData = TempInnerData.Split(',');
+                        HeaderListValue_.Add(new GenerateWeeklyData
+                        {
+                            MixerName = innerTempListData[0]
+                        });
+                    }
+                }
+
+                string templateFileName = "DailyTargetActual.xlsx";
+                string filename = string.Format("DailyTargetActual.xlsx");
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                string dir = Path.GetTempPath();
+                FileInfo newFile = new FileInfo(Path.Combine(dir, filename));
+                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Templates\", templateFileName);
+                FileInfo templateFile = new FileInfo(templatePath);
+                using (ExcelPackage package = new ExcelPackage(newFile, templateFile))
+                {
+                    ExcelWorksheet DataHere = package.Workbook.Worksheets["Report"];
+
+                    if (TabType == "weekly" || TabType == "monthly")
+                    {
+                        #region Header
+                        DataHere.Cells["A1:B1"].Merge = true;
+                        DataHere.Cells["A1:B1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells["A1:B1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells["A1:B1"].Style.WrapText = true;
+                        DataHere.Cells["A1:B1"].Style.Font.Bold = true;
+                        DataHere.Cells["A1:B1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Value = "Date";
+                        int FirstCell = 3;
+                        int SecondCell = 4;
+                        for (int HeaderListValue_i = 0; HeaderListValue_i < HeaderListValue_.Count; HeaderListValue_i++)
+                        {
+                            var FirstCellName = GetExcelColumnName(FirstCell);
+                            var SecondCellName = GetExcelColumnName(SecondCell);
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Merge = true;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.WrapText = true;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.Font.Bold = true;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + "1:" + SecondCellName + "1"].Value = HeaderListValue_[HeaderListValue_i].MixerName;
+                            int MixerDataCounter = 2;
+                            for (int i = 0; i < ListDataValue_.Count; i++)
+                            {
+                                if (HeaderListValue_[HeaderListValue_i].MixerName == ListDataValue_[i].MixerName)
+                                {
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Merge = true;
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Style.WrapText = true;
+
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCellName + MixerDataCounter + ":" + SecondCellName + MixerDataCounter].Value = ListDataValue_[i].MixerData;
+                                    MixerDataCounter++;
+                                }
+                            }
+                            FirstCell = FirstCell + 2;
+                            SecondCell = SecondCell + 2;
+                        }
+                        var OutsideFirstCellName = GetExcelColumnName(FirstCell);
+                        var OutsideSecondCellName = GetExcelColumnName(SecondCell);
+
+                        int _OuterFirstCell = FirstCell;
+                        int _OuterSecondCell = SecondCell;
+                        int MainDataCounter = 2;
+                        for (int i = 0; i < ListData_.Count; i++)
+                        {
+                            int _FirstCell = FirstCell;
+                            int _SecondCell = SecondCell;
+                            var _OutsideFirstCellName = GetExcelColumnName(_FirstCell);
+                            var _OutsideSecondCellName = GetExcelColumnName(_SecondCell);
+
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Merge = true;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.WrapText = true;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Value = ListData_[i].Target;
+                            _FirstCell = _FirstCell + 2;
+                            _SecondCell = _SecondCell + 2;
+                            _OutsideFirstCellName = GetExcelColumnName(_FirstCell);
+                            _OutsideSecondCellName = GetExcelColumnName(_SecondCell);
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Merge = true;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.WrapText = true;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Value = ListData_[i].Achievement;
+                            _FirstCell = _FirstCell + 2;
+                            _SecondCell = _SecondCell + 2;
+                            _OutsideFirstCellName = GetExcelColumnName(_FirstCell);
+                            _OutsideSecondCellName = GetExcelColumnName(_SecondCell);
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Merge = true;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.WrapText = true;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[_OutsideFirstCellName + MainDataCounter + ":" + _OutsideSecondCellName + MainDataCounter].Value = ListData_[i].Actual;
+                            MainDataCounter++;
+                            _FirstCell = _OuterFirstCell;
+                            _SecondCell = _OuterSecondCell;
+                        }
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Merge = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.WrapText = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Font.Bold = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Value = "Target";
+                        FirstCell = FirstCell + 2;
+                        SecondCell = SecondCell + 2;
+                        OutsideFirstCellName = GetExcelColumnName(FirstCell);
+                        OutsideSecondCellName = GetExcelColumnName(SecondCell);
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Merge = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.WrapText = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Font.Bold = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Value = "Achievement";
+                        FirstCell = FirstCell + 2;
+                        SecondCell = SecondCell + 2;
+                        OutsideFirstCellName = GetExcelColumnName(FirstCell);
+                        OutsideSecondCellName = GetExcelColumnName(SecondCell);
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Merge = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.WrapText = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Font.Bold = true;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells[OutsideFirstCellName + "1:" + OutsideSecondCellName + "1"].Value = "Actual";
+                        #endregion
+                        #region Date Details
+                        int DateRowCounter = 2;
+                        for (int ListData_i = 0; ListData_i < ListData_.Count; ListData_i++)
+                        {
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Merge = true;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Style.WrapText = true;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].Value = ListData_[ListData_i].Date;
+                            DataHere.Cells["A" + DateRowCounter + ":B" + DateRowCounter].AutoFitColumns(17, 50);
+                            DateRowCounter++;
+                        }
+                        #endregion
+                    }
+                    else if (TabType == "machine")
+                    {
+                        DataHere.Cells["A1:B1"].Merge = true;
+                        DataHere.Cells["A1:B1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells["A1:B1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells["A1:B1"].Style.WrapText = true;
+                        DataHere.Cells["A1:B1"].Style.Font.Bold = true;
+                        DataHere.Cells["A1:B1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B1"].Value = "Target Date";
+
+                        DataHere.Cells["C1:D1"].Merge = true;
+                        DataHere.Cells["C1:D1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells["C1:D1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells["C1:D1"].Style.WrapText = true;
+                        DataHere.Cells["C1:D1"].Style.Font.Bold = true;
+                        DataHere.Cells["C1:D1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["C1:D1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["C1:D1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["C1:D1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["C1:D1"].Value = "Machine ID";
+
+                        DataHere.Cells["E1:F1"].Merge = true;
+                        DataHere.Cells["E1:F1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells["E1:F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells["E1:F1"].Style.WrapText = true;
+                        DataHere.Cells["E1:F1"].Style.Font.Bold = true;
+                        DataHere.Cells["E1:F1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["E1:F1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["E1:F1"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["E1:F1"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["E1:F1"].Value = "Target Qty";
+                        int RowCounter = 2;
+                        for (int i = 0; i < MainListValue_.Count; i++)
+                        {
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Merge = true;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Style.WrapText = true;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + RowCounter + ":B" + RowCounter].Value = MainListValue_[i].Date;
+
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Merge = true;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Style.WrapText = true;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["C" + RowCounter + ":D" + RowCounter].Value = MainListValue_[i].MixerName;
+
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Merge = true;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Style.WrapText = true;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["E" + RowCounter + ":F" + RowCounter].Value = MainListValue_[i].Target;
+                            RowCounter++;
+                        }
+                    }
+                    else if (TabType == "daily")
+                    {
+                        DataHere.Cells["A1:B2"].Merge = true;
+                        DataHere.Cells["A1:B2"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        DataHere.Cells["A1:B2"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        DataHere.Cells["A1:B2"].Style.WrapText = true;
+                        DataHere.Cells["A1:B2"].Style.Font.Bold = true;
+                        DataHere.Cells["A1:B2"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B2"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B2"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B2"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        DataHere.Cells["A1:B2"].Value = "Date";
+                        int DateCounter = 3;
+                        for (int i = 0; i < ListData_.Count; i++)
+                        {
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Merge = true;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Style.WrapText = true;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells["A" + DateCounter + ":B" + DateCounter].Value = ListData_[i].Date;
+                            DateCounter++;
+                        }
+                        int FirstColumn = 3;
+                        int SecondColumn = 8;
+                        int HeaderCounter = 1;
+                        int HeaderDetails = 2;
+                        int HeaderDetailsData = 3;
+                        int FirstTarget = 3;
+                        int SecondTarget = 4;
+                        int FirstActual = 5;
+                        int SecondActual = 6;
+                        int FirstCycle = 7;
+                        int SecondCycle = 8;
+                        for (int mixeri = 0; mixeri < HeaderListValue_.Count; mixeri++)
+                        {
+                            var FirstCellName = GetExcelColumnName(FirstColumn);
+                            var SecondCellName = GetExcelColumnName(SecondColumn);
+                            HeaderDetailsData = 3;
+                            var FirstTargetCellName = GetExcelColumnName(FirstTarget);
+                            var SecondTargetCellName = GetExcelColumnName(SecondTarget);
+                            var FirstActualCellName = GetExcelColumnName(FirstActual);
+                            var SecondActualCellName = GetExcelColumnName(SecondActual);
+                            var FirstCycleCellName = GetExcelColumnName(FirstCycle);
+                            var SecondCycleCellName = GetExcelColumnName(SecondCycle);
+
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Merge = true;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Style.WrapText = true;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCellName + HeaderCounter + ":" + SecondCellName + HeaderCounter].Value = HeaderListValue_[mixeri].MixerName;
+
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Merge = true;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Style.WrapText = true;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstTargetCellName + HeaderDetails + ":" + SecondTargetCellName + HeaderDetails].Value = "TARGET";
+
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Merge = true;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Style.WrapText = true;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstActualCellName + HeaderDetails + ":" + SecondActualCellName + HeaderDetails].Value = "ACTUAL";
+
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Merge = true;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Style.WrapText = true;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            DataHere.Cells[FirstCycleCellName + HeaderDetails + ":" + SecondCycleCellName + HeaderDetails].Value = "No. Of Cycle";
+
+
+                            for (int ListData_i = 0; ListData_i < ListData_.Count; ListData_i++)
+                            {
+                                if (ListData_[ListData_i].MixerName == HeaderListValue_[mixeri].MixerName)
+                                {
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Merge = true;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Style.WrapText = true;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstTargetCellName + HeaderDetailsData + ":" + SecondTargetCellName + HeaderDetailsData].Value = ListData_[ListData_i].Target;
+
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Merge = true;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Style.WrapText = true;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstActualCellName + HeaderDetailsData + ":" + SecondActualCellName + HeaderDetailsData].Value = ListData_[ListData_i].Actual;
+
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Merge = true;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Style.WrapText = true;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                    DataHere.Cells[FirstCycleCellName + HeaderDetailsData + ":" + SecondCycleCellName + HeaderDetailsData].Value = ListData_[ListData_i].Achievement;
+                                }
+                                HeaderDetailsData++;
+                            }
+
+                            HeaderCounter++;
+                            HeaderDetails++;
+                            FirstColumn = FirstColumn + 6;
+                            SecondColumn = SecondColumn + 6;
+                            FirstTarget = FirstTarget + 2;
+                            SecondTarget = SecondTarget + 2;
+                            FirstActual = FirstActual + 2;
+                            SecondActual = SecondActual + 2;
+                            FirstCycle = FirstCycle + 2;
+                            SecondCycle = SecondCycle + 2;
+                        }
+
+
+
+
+
+
+                    }
+                    return File(package.GetAsByteArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+                }
+
+            }
+            catch (Exception err)
+            {
+                string errmsg = "";
+                if (err.InnerException != null)
+                    errmsg = ("An error occured: " + err.InnerException.ToString());
+                else
+                    errmsg = ("An error occured: " + err.Message.ToString());
+                error = true;
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        public string GetExcelColumnName(int columnNumber)
+        {
+            int dividend = columnNumber;
+            string columnName = String.Empty;
+            int modulo;
+
+            while (dividend > 0)
+            {
+                modulo = (dividend - 1) % 26;
+                columnName = Convert.ToChar(65 + modulo).ToString() + columnName;
+                dividend = (int)((dividend - modulo) / 26);
+            }
+
+            return columnName;
+        }
+    }
+}

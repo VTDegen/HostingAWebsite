@@ -1,0 +1,19 @@
+﻿namespace Kedica.Areas.MasterMaintenance.Models
+{
+    public class mMachine
+    {
+        public int ID { get; set; }
+        public string MachineName { get; set; }
+        public int TimeInterval { get; set; }
+        public int TargetTemperature { get; set; }
+        public string IsActive { get; set; }
+    }
+    public class IpAddressData
+    {
+        public int ID { get; set; }
+        public int MachineID { get; set; }
+        public string IpAddress { get; set; }
+        public string EffectiveDate { get; set; }
+        public int SensorType { get; set; }
+    }
+}

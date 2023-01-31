@@ -1,0 +1,80 @@
+﻿namespace Kedica.Areas.Transaction.Models
+{
+    public class tHydration
+    {
+        public int ID { get; set; }
+        public int MixerNo { get; set; }
+        public string MixerNoValue { get; set; }
+        public int Cycle { get; set; }
+        public string CycleValue { get; set; }
+        public string ProcessDate { get; set; }
+        public int ProductionStaff { get; set; }
+        public string ProductionStaffValue { get; set; }
+        public string ProcessCode { get; set; }
+        public string Remarks { get; set; }
+        public int TemplateID { get; set; }
+        public int IsCompleted { get; set; }
+    }
+    public class HydrationTransaction
+    {
+        public int ID { get; set; }
+        public int ProcessID { get; set; }
+        public string ProcessValue { get; set; }
+        public int IntervalID { get; set; }
+        public string InvertalValue { get; set; }
+        public string HitTemp { get; set; }
+        public string Judgement { get; set; }
+        public string WaterTemp { get; set; }
+    }
+    public class HydrationSummary
+    {
+        public string UnloadingTime { get; set; }
+        public int OutputWeight { get; set; }
+        public string TotalCycleTime { get; set; }
+        public int TotalWaterInput { get; set; }
+        public string OutputResult { get; set; }
+        public string MixingTimeFinished { get; set; }
+    }
+    public class HydrationHourlyChecking
+    {
+        public int ID { get; set; }
+        public string InvertalValue { get; set; }
+        public string HitTemp { get; set; }
+        public string WaterTemp { get; set; }
+        public string LatestDate { get; set; }
+        public decimal Interval { get; set; }
+        public decimal CycleCount { get; set; }
+        public int HCounter { get; set; }
+
+    }
+    public class HydrationAfterCycle
+    {
+        public string TimeCheck { get; set; }
+        public string TempCheck { get; set; }
+        public decimal Interval { get; set; }
+    }
+    public class HydrationHourlyCheckingHistory
+    {
+        public int ID { get; set; }
+        public int HydrationID { get; set; }
+        public int CycleCount { get; set; }
+        public int HCounter { get; set; }
+        public int Interval { get; set; }
+        public string HitTemp { get; set; }
+        public string InvertalValue { get; set; }
+        public string WaterTemp { get; set; }
+
+    }
+    public class HydrationAfterCycleHistory
+    {
+        public int ID { get; set; }
+        public int HydrationID { get; set; }
+        public int Interval { get; set; }
+        public int HCounter { get; set; }
+        public int CycleCount { get; set; }
+        public string ConvertedTime { get; set; }
+        public string HitTemp { get; set; }
+        public string InvertalValue { get; set; }
+        public string Judgement { get; set; }
+    }
+}

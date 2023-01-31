@@ -1,0 +1,235 @@
+﻿using Kedica.Areas.MasterMaintenance.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web.Mvc;
+
+namespace Kedica.Areas.MasterMaintenance.Controllers
+{
+    public class OperationMasterController : Controller
+    {
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+        // GET: MasterMaintenance/OperationMaster
+        public ActionResult Index()
+        {
+            return View("OperationMaster");
+        }
+        public ActionResult GetOperationList()
+        {
+            List<mOperation> data = new List<mOperation>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Operation_GetList";
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new mOperation
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    Process = sdr["Process"].ToString(),
+                                    Cycle = sdr["Cycle"].ToString(),
+                                    IsActive = sdr["IsActive"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.Process.ToLower().Contains(searchValue.ToLower()) ||
+                    x.Cycle.ToString().Contains(searchValue.ToLower())
+                ).ToList<mOperation>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<mOperation>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveOperation(mOperation Operation)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmdMySql = conn.CreateCommand())
+                        {
+                            cmdMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMySql.CommandText = "Operation_InsertUpdate";
+                            cmdMySql.Parameters.Clear();
+                            cmdMySql.Parameters.AddWithValue("@_ID", Operation.ID);
+                            cmdMySql.Parameters.AddWithValue("@_Process", Operation.Process);
+                            cmdMySql.Parameters.AddWithValue("@_Cycle", Operation.Cycle);
+                            cmdMySql.Parameters.AddWithValue("@_IsActive", Convert.ToInt32(Operation.IsActive));
+                            cmdMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+
+                            MySqlParameter ErrorMessage = cmdMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                            MySqlParameter Error = cmdMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                            Error.Direction = ParameterDirection.Output;
+                            ErrorMessage.Direction = ParameterDirection.Output;
+
+                            cmdMySql.ExecuteNonQuery();
+                            endMsg = Operation.ID == 0 ? "saved." : "updated";
+
+                            error = Convert.ToBoolean(Error.Value);
+                            if (error)
+                            {
+                                modelErrors.Add(ErrorMessage.Value.ToString());
+                            }
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Operation was successfully " + endMsg });
+            }
+        }
+        public ActionResult DeleteOperation(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Operation_Delete";
+
+                        cmdMySql.Parameters.Clear();
+                        cmdMySql.Parameters.AddWithValue("@OperationID", ID);
+                        cmdMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        cmdMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Operation was successfully deleted." });
+
+        }
+        public ActionResult GetOperationDetails(int ID)
+        {
+            mOperation operationDetails = new mOperation();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMySql = conn.CreateCommand())
+                    {
+                        cmdMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMySql.CommandText = "Operation_GetDatalist";
+                        cmdMySql.Parameters.AddWithValue("@OperationID", ID);
+                        using (MySqlDataReader sdr = cmdMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            operationDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            operationDetails.Process = sdr["Process"].ToString();
+                            operationDetails.Cycle = sdr["Cycle"].ToString();
+                            operationDetails.IsActive = sdr["IsActive"].ToString();
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { operationData = operationDetails } }, JsonRequestBehavior.AllowGet);
+        }
+    }
+}

@@ -1,0 +1,39 @@
+﻿@{
+    ViewBag.Title = "Restore Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section css{
+    @Styles.Render("~/RestoreInformation-CSS")
+}
+
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <div class="row ">
+            <div class="col-sm-3 offset-9">
+                <button type="button" id="btnRestoreInformation" class="btn btn-sm btn-info btn-block tbl-tr-btns" disabled><span class="fa fa-history"></span><span class="btnLabel"> Restore Information</span></button>
+            </div>
+        </div>
+        <br />
+        <div class="hljs-wrapper">
+            <table id="tblRestoreInformation" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@section scripts{
+    @Scripts.Render("~/RestoreInformation-JS")
+}

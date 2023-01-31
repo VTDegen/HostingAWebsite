@@ -1,0 +1,318 @@
+﻿
+@{
+    ViewBag.Title = "Hold Output Process";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/HoldOutput-CSS")
+    <style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ul {
+            list-style: none;
+        }
+    </style>}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="nav nav-tabs">
+                    <li class="nav-items">
+                        <a href="#OnHoldTab" data-toggle="tab" class="nav-link active" id="OnHoldTabValid">
+                            <span class="d-sm-none">Tab 1</span>
+                            <span class="d-sm-block d-none">On Hold</span>
+                        </a>
+                    </li>
+                    <li class="nav-items">
+                        <a href="#PrevHoldTab" data-toggle="tab" class="nav-link" id="PrevHoldTabValid">
+                            <span class="d-sm-none">Tab 2</span>
+                            <span class="d-sm-block d-none">Previously Hold</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active show" id="OnHoldTab">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="row">
+                                    <div class="col-sm-3 m-b-5 ReadAndWrite">
+                                        <button type="button" id="btnAddHoldOutput" class="btn btn-sm btn-primary btn-block"><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                                    </div>
+                                    <div class="col-sm-3 m-b-5 ReadAndWrite">
+                                        <button type="button" id="btnEditHoldOutput" class="btn btn-sm btn-info btn-block tbl-tr-btns" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                                    </div>
+                                    <div class="col-sm-3 m-b-5 DeleteEnabled">
+                                        <button type="button" id="btnDeleteHoldOutput" class="btn btn-sm btn-danger btn-block tbl-tr-btns" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                                    </div>
+                                    <div class="col-sm-3 m-b-5 DeleteEnabled">
+                                        <button type="button" id="btnHoldOutputData" class="btn btn-sm btn-warning btn-block tbl-tr-btns" disabled><span class="fa fa-share"></span><span class="btnLabel"> Un Hold</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="PrevHoldTab">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="row">
+                                    <div class="col-sm-3 m-b-5 ReadAndWrite">
+                                        <button type="button" id="btnUnHoldOutputData" class="btn btn-sm btn-warning btn-block tbl-tr-btns" disabled><span class="fa fa-share"></span><span class="btnLabel"> Hold</span></button>
+                                    </div>
+                                    <div class="col-sm-3 m-b-5 ReadAndWrite">
+                                    </div>
+                                    <div class="col-sm-3 m-b-5 DeleteEnabled">
+                                    </div>
+                                    <div class="col-sm-3 m-b-5 DeleteEnabled">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form data-parsley-validate id="frmFilterHoldOutput">
+            <div class="row ">
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="TransactionDate">Transaction Date<span class="text-danger"></span></label>
+                        </div>
+                        <input type="text" id="FilterTransactionDate" name="FilterTransactionDate" class="form-control input" data-parsley-maxlength="50" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterInputDrum">Process Code<span class="text-danger"></span></label>
+                        </div>
+                        <select class="form-control input form-control-sm custom-select" id="FilterProcessCode" name="FilterProcessCode">
+                            <option value="">Choose Process Code</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterProcessCode">Mixer No <span class="text-danger"></span></label>
+                        </div>
+                        <select class="form-control input form-control-sm custom-select" id="FilterMixerNo" name="FilterMixerNo">
+                            <option value="">Choose Mixer No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterMixerNo">Cycle No <span class="text-danger"></span></label>
+                        </div>
+                        <select class="form-control input form-control-sm custom-select" id="FilterCycle" name="FilterCycle">
+                            <option value="">Choose Cycle</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterCycle">Output WT (KG) <span class="text-danger"></span></label>
+                        </div>
+                        <input type="text" id="FilterOutputWT" name="FilterOutputWT" class="form-control input" data-parsley-maxlength="50" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" data-parsley-errors-container="#err-FilterOutputWT" autocomplete="off">
+                    </div>
+                    <div id="err-FilterOutputWT"></div>
+                </div>
+                @*<div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:112px;" for="FilterFeCl">Fe CL (Li) <span class="text-danger"></span></label>
+                            </div>
+                            <input type="text" id="FilterFeCl" name="FilterFeCl" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                        </div>
+                    </div>*@
+            </div>
+            @*<div class="row ">
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:112px;" for="FilterInputWT">Input WT (KG)<span class="text-danger"></span></label>
+                            </div>
+                            <input type="text" id="FilterInputWT" name="FilterInputWT" class="form-control input" data-parsley-maxlength="50" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" data-parsley-errors-container="#err-FilterInputWT" autocomplete="off">
+                        </div>
+                        <div id="err-FilterInputWT"></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm m-b-5">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" style="width:112px;" for="FilterOutputWT">Output WT (KG)<span class="text-danger"></span></label>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>*@
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-6">
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="row">
+                                <div class="col-sm-6 m-b-5">
+                                    <button type="submit" id="btnFilterHoldOutput" class="btn btn-sm btn-primary btn-block "><span class="fa fa-glass-martini"></span><span class="btnLabel"> Filter</span></button>
+                                </div>
+                                <div class="col-sm-6 m-b-5">
+                                    <button type="button" id="btnCancelDataHoldOutput" class="btn btn-sm btn-warning btn-block "><span class="fa fa-times-circle"></span><span class="btnLabel"> Clear</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="hljs-wrapper">
+            <table id="tblHoldOutput" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlHoldOutput" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlHoldOutputTitle"> Create HoldOutput Process</h4>
+                <button type="button" class="close" id="btnUpClosedMdl" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmHoldOutput">
+                <div class="modal-body">
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="TransactionDate">Transaction Date<span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="TransactionDate" name="TransactionDate" class="form-control input" required data-parsley-maxlength="50" data-parsley-errors-container="#err-TransactionDate" autocomplete="off">
+                            </div>
+                            <div id="err-TransactionDate"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="ProcessCode">Process Code <span class="text-danger">*</span></label>
+                                </div>
+                                <select class="form-control input form-control-sm custom-select" id="ProcessCode" name="ProcessCode" required data-parsley-errors-container="#err-ProcessCode">
+                                    <option value="">Choose Process Code</option>
+                                </select>
+                            </div>
+                            <div id="err-ProcessCode"></div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="InputDrum">Mixer No<span class="text-danger"></span></label>
+                                </div>
+                                @*<select class="form-control input form-control-sm custom-select" id="InputDrum" name="InputDrum" required data-parsley-errors-container="#err-InputDrum" hidden>
+                                        <option value="">Choose Input Drum</option>
+                                    </select>*@
+                                <input type="text" id="MixerNo" readonly name="MixerNo" class="form-control input " data-parsley-maxlength="255" autocomplete="off">
+                            </div>
+                            @*<div id="err-InputDrum"></div>*@
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="MixerNo">Cycle No <span class="text-danger"></span></label>
+                                </div>
+                                <input type="text" id="Cycle" readonly name="Cycle" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="Cycle">Output WT (KG) <span class="text-danger"></span></label>
+                                </div>
+                                <input type="text" id="OutputWT" name="OutputWT" class="form-control input" readonly data-parsley-maxlength="50" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" data-parsley-errors-container="#err-OutputWT" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            @*<div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:130px;" for="FeCI">Fe CL (Li) <span class="text-danger"></span></label>
+                                    </div>
+                                    <input type="text" id="FeCl" readonly name="FeCl" class="form-control input" data-parsley-maxlength="255" autocomplete="off">
+                                </div>*@
+                        </div>
+                    </div>
+                    @*<div class="row ">
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:130px;" for="InputWT">Input WT (KG)<span class="text-danger"></span></label>
+                                    </div>
+                                    <input type="text" id="InputWT" name="InputWT" class="form-control input" readonly data-parsley-maxlength="50" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" data-parsley-errors-container="#err-InputWT" autocomplete="off">
+                                </div>
+                                <div id="err-InputWT"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:130px;" for="OutputWT">Output WT (KG)<span class="text-danger"></span></label>
+                                    </div>
+                                    <input type="text" id="OutputWT" name="OutputWT" class="form-control input" readonly data-parsley-maxlength="50" data-parsley-pattern="^[0-9]*\.[0-9]{2}$" data-parsley-validation-threshold="1" data-parsley-debounce="500" data-parsley-type="number" data-parsley-trigger="keyup" data-parsley-errors-container="#err-OutputWT" autocomplete="off">
+                                </div>
+                                <div id="err-OutputWT"></div>
+                            </div>
+                        </div>*@
+                    @*<div class="row ">
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:130px;" for="InputOutput">Input/Output<span class="text-danger"></span></label>
+                                    </div>
+                                    <input type="text" id="InputOutput" name="InputOutput" class="form-control input" readonly data-parsley-maxlength="50" data-parsley-errors-container="#err-InputOutput" autocomplete="off">
+                                </div>
+                                <div id="err-InputOutput"></div>
+                            </div>
+                        </div>*@
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" id="HoldOutputID" class="input" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveHoldOutput"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelHoldOutput"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section scripts{
+    @Scripts.Render("~/HoldOutput-JS")
+}

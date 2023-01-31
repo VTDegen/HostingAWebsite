@@ -1,0 +1,53 @@
+﻿"use strict";
+(function () {
+    const UserManual = function () {
+        return new UserManual.init();
+    }
+    UserManual.init = function () {
+        $D.init.call(this);
+        this.$tblUserManual = "";
+    };
+    UserManual.prototype = {
+        drawDatatables: function () {
+            var self = this;
+            if (!$.fn.DataTable.isDataTable('#tblUserManual')) {
+                self.$tblUserManual = $('#tblUserManual').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    select: true,
+                    "order": [[0, "asc"]],
+                    "pageLength": 25,
+                    "ajax": {
+                        "url": "/Documents/UserManual/GetUserManualList",
+                        "type": "POST",
+                        "datatype": "json",
+                    },
+                    dataSrc: "data",
+                    scrollY: '100%', scrollX: '100%',
+                    columns: [
+                        { title: "File Name", data: "FileName" },
+                        {
+                            title: "Download",
+                            className: "text-center ",
+                            "bSortable": false,
+                            "mData": function (data) {
+                                return '<button type="button" id=btnshowmanual' + data.ID + ' data-filename="' + data.FileDocumentName + '" class="btn btn-sm btn-primary btndownloadusermanual"><span class="fa fa-download"></span></button>';
+                            }
+                        }
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).attr('data-id', data.ID);
+                    }
+                });
+            }
+            return this;
+        },
+
+    };
+    UserManual.init.prototype = $.extend(UserManual.prototype, $D.init.prototype);
+    UserManual.init.prototype = UserManual.prototype;
+    $(document).ready(function () {
+        var Manual = UserManual();
+        //Manual.drawDatatables();
+    });
+})();

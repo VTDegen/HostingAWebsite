@@ -1,0 +1,512 @@
+﻿using Kedica.Areas.Transaction.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web.Mvc;
+
+namespace Kedica.Areas.Transaction.Controllers
+{
+    public class HoldOutputController : Controller
+    {
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+        // GET: Transaction/HoldOutput
+        public ActionResult Index()
+        {
+            return View("HoldOutput");
+        }
+        public ActionResult GetHoldOutputList()
+        {
+            List<tHoldOutput> data = new List<tHoldOutput>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            string FilterTransactionDate = Request["FilterData[FilterTransactionDate]"];
+            string FilterInputDrum = Request["FilterData[FilterInputDrum]"];
+            string FilterProcessCode = Request["FilterData[FilterProcessCode]"];
+            string FilterMixerNo = Request["FilterData[FilterMixerNo]"];
+            string FilterCycle = Request["FilterData[FilterCycle]"];
+            string FilterFeCl = Request["FilterData[FilterFeCl]"];
+            string FilterInputWT = Request["FilterData[FilterInputWT]"];
+            string FilterOutputWT = Request["FilterData[FilterOutputWT]"];
+            string TabValidate = Request["TabValidation"];
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HoldOutput_GetList";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_TransactionDate", FilterTransactionDate);
+                        cmdMyMySql.Parameters.AddWithValue("@_InputDrum", FilterInputDrum);
+                        cmdMyMySql.Parameters.AddWithValue("@_ProcessCode", FilterProcessCode);
+                        cmdMyMySql.Parameters.AddWithValue("@_MixerNo", FilterMixerNo);
+                        cmdMyMySql.Parameters.AddWithValue("@_Cycle", FilterCycle);
+                        cmdMyMySql.Parameters.AddWithValue("@_FeCl", FilterFeCl);
+                        cmdMyMySql.Parameters.AddWithValue("@_InputWT", FilterInputWT);
+                        cmdMyMySql.Parameters.AddWithValue("@_OutputWT", FilterOutputWT);
+                        cmdMyMySql.Parameters.AddWithValue("@_TabValidate", TabValidate);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new tHoldOutput
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    TransactionDate = sdr["TransactionDate"].ToString(),
+                                    MachineName = sdr["MachineName"].ToString(),
+                                    Value = sdr["Value"].ToString(),
+                                    InputDrumValue = sdr["Process"].ToString(),
+                                    InputWT = Convert.ToDecimal(sdr["InputWT"]),
+                                    OutPutWT = Convert.ToDecimal(sdr["OutPutWT"]),
+                                    OIResult = Convert.ToDecimal(sdr["OIResult"]),
+                                    ProcessTemplateData = sdr["ProcessTemplateData"].ToString(),
+                                    HydrationValue = sdr["ProcessCode"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.TransactionDate.ToString().Contains(searchValue.ToLower()) ||
+                    x.MachineName.ToString().Contains(searchValue.ToLower()) ||
+                    x.Value.ToString().Contains(searchValue.ToLower()) ||
+                    x.InputDrum.ToString().Contains(searchValue.ToLower()) ||
+                    x.InputWT.ToString().Contains(searchValue.ToLower()) ||
+                    x.OutPutWT.ToString().Contains(searchValue.ToLower()) ||
+                    x.OIResult.ToString().Contains(searchValue.ToLower()) ||
+                    x.ProcessTemplateData.ToString().Contains(searchValue.ToLower())
+                ).ToList<tHoldOutput>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<tHoldOutput>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetHydrationData(int ID)
+        {
+            ArrayList HydrationDataList = new ArrayList();
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HoldOutput_GetHydrationDataList";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                HydrationDataList.Add(new
+                                {
+                                    MachineName = sdr["MachineName"].ToString(),
+                                    Value = sdr["Value"].ToString(),
+                                    ProcessTemplateData = sdr["ProcessTemplateData"].ToString(),
+                                    OutputWeight = sdr["OutputWeight"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    HydrationData = HydrationDataList
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveHoldOutputProcess(tHoldOutput HoldOutput)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        MySqlTransaction transaction;
+                        transaction = conn.BeginTransaction();
+                        try
+                        {
+                            using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                            {
+                                cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                                cmdMyMySql.CommandText = "HoldOutput_InsertUpdate";
+                                cmdMyMySql.Parameters.Clear();
+                                cmdMyMySql.Parameters.AddWithValue("@_ID", HoldOutput.ID);
+                                cmdMyMySql.Parameters.AddWithValue("@_TransactionDate", HoldOutput.TransactionDate);
+                                cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HoldOutput.HydrationID));
+                                cmdMyMySql.Parameters.AddWithValue("@_InputDrum", Convert.ToInt32(HoldOutput.InputDrum));
+                                cmdMyMySql.Parameters.AddWithValue("@_InputWT", Convert.ToDecimal(HoldOutput.InputWT));
+                                cmdMyMySql.Parameters.AddWithValue("@_OutPutWT", Convert.ToDecimal(HoldOutput.OutPutWT));
+                                cmdMyMySql.Parameters.AddWithValue("@_OIResult", Convert.ToDecimal(HoldOutput.OIResult));
+                                cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+
+                                MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                                MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                                Error.Direction = ParameterDirection.Output;
+                                ErrorMessage.Direction = ParameterDirection.Output;
+
+                                cmdMyMySql.ExecuteNonQuery();
+                                endMsg = HoldOutput.ID == 0 ? "saved." : "updated.";
+
+                                error = Convert.ToBoolean(Error.Value);
+                                if (error)
+                                {
+                                    modelErrors.Add(ErrorMessage.Value.ToString());
+                                }
+                            }
+                            transaction.Commit();
+                            conn.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            modelErrors.Add("An error occured: " + ex.Message);
+                            try
+                            {
+                                transaction.Rollback();
+                            }
+                            catch (Exception ex2)
+                            {
+                                modelErrors.Add("An error occured: " + ex2.Message);
+                            }
+                        }
+
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "HoldOutput Process was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetHoldoutDetails(int ID)
+        {
+            tHoldOutput holdoutDetails = new tHoldOutput();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HoldOutput_GetDatalist";
+                        cmdMyMySql.Parameters.AddWithValue("@_HoldOutputID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            holdoutDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            holdoutDetails.HydrationID = Convert.ToInt32(sdr["HydrationID"]);
+                            holdoutDetails.HydrationValue = sdr["ProcessCode"].ToString();
+                            holdoutDetails.MachineName = sdr["MachineName"].ToString();
+                            holdoutDetails.Value = sdr["Value"].ToString();
+                            holdoutDetails.InputDrumValue = sdr["Process"].ToString();
+                            holdoutDetails.InputDrum = Convert.ToInt32(sdr["InputDrum"]);
+                            holdoutDetails.InputWT = Convert.ToDecimal(sdr["InputWT"]);
+                            holdoutDetails.OutPutWT = Convert.ToDecimal(sdr["OutPutWT"]);
+                            holdoutDetails.OIResult = Convert.ToDecimal(sdr["OIResult"]);
+                            holdoutDetails.ProcessTemplateData = sdr["ProcessTemplateData"].ToString();
+                            holdoutDetails.TransactionDate = sdr["TransactionDate"].ToString();
+                        }
+                    }
+                    conn.Close();
+
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    holdoutputData = holdoutDetails
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteHoldout(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HoldOutput_Delete";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HoldOutputID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                        MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                        Error.Direction = ParameterDirection.Output;
+                        ErrorMessage.Direction = ParameterDirection.Output;
+
+                        cmdMyMySql.ExecuteNonQuery();
+
+                        error = Convert.ToBoolean(Error.Value);
+                        if (error)
+                        {
+                            modelErrors.Add(ErrorMessage.Value.ToString());
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "HoldOutput Process was successfully deleted." });
+
+        }
+        public ActionResult UnHoldData(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HoldOutput_UnHoldData";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HoldOutputID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                        MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                        Error.Direction = ParameterDirection.Output;
+                        ErrorMessage.Direction = ParameterDirection.Output;
+
+                        cmdMyMySql.ExecuteNonQuery();
+
+                        error = Convert.ToBoolean(Error.Value);
+                        if (error)
+                        {
+                            modelErrors.Add(ErrorMessage.Value.ToString());
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "HoldOutput Process was successfully Un Hold." });
+
+        }
+        public ActionResult HoldData(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HoldOutput_HoldData";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HoldOutputID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                        MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                        Error.Direction = ParameterDirection.Output;
+                        ErrorMessage.Direction = ParameterDirection.Output;
+
+                        cmdMyMySql.ExecuteNonQuery();
+
+                        error = Convert.ToBoolean(Error.Value);
+                        if (error)
+                        {
+                            modelErrors.Add(ErrorMessage.Value.ToString());
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "HoldOutput Process was successfully Hold." });
+
+        }
+        public ActionResult GetHydrationInputData(int DrumID, int HydrationID)
+        {
+            ArrayList HoldInput = new ArrayList();
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HoldOutput_GetInputData";
+                        cmdMyMySql.Parameters.AddWithValue("@_DrumID", DrumID);
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", HydrationID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                HoldInput.Add(new
+                                {
+                                    InputWeight = sdr["ProcessTemplateData"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    InputData = HoldInput
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
+    }
+}

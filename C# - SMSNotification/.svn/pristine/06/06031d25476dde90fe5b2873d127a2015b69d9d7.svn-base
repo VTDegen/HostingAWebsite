@@ -1,0 +1,214 @@
+﻿@{
+    ViewBag.Title = "Machine Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/MachineMaster-CSS")
+}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-3 m-b-5 ReadAndWrite">
+                        <button type="button" id="btnAddMachine" class="btn btn-sm btn-primary btn-block"><span class="fa fa-plus"></span><span class="btnLabel"> Add</span></button>
+                    </div>
+                    <div class="col-sm-3 m-b-5 ReadAndWrite">
+                        <button type="button" id="btnEditMachine" class="btn btn-sm btn-info btn-block tbl-tr-btns" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                    </div>
+                    <div class="col-sm-3 m-b-5 DeleteEnabled">
+                        <button type="button" id="btnDeleteMachine" class="btn btn-sm btn-danger btn-block tbl-tr-btns" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                    </div>
+                    @*<div class="col-sm-3 m-b-5 ReadAndWrite">
+                            <button type="button" id="btnSetIpAddress" class="btn btn-sm btn-info btn-block tbl-tr-btns" disabled><span class="fa fa-sitemap"></span><span class="btnLabel"> Set Ip Adress</span></button>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+        <div class="hljs-wrapper">
+            <table id="tblMachine" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlMachine" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlMachineTitle"> Create Machine</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmMachine">
+                <div class="modal-body">
+                    <div class="row ">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="MachineName">Machine Name <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="MachineName" name="MachineName" class="form-control input" data-parsley-required data-parsley-maxlength="20" data-parsley-errors-container="#err-MachineName" autocomplete="off">
+                            </div>
+                            <div id="err-MachineName"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm m-b-5">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" style="width:130px;" for="Role">Active <span class="text-danger">*</span></label>
+                                </div>
+                                <select id="IsActive" name="IsActive" class="form-control input" required data-parsley-errors-container="#err-IsActive" autocomplete="off">
+                                    <option value="">--Please Select--</option>
+                                    <option value="0">Active</option>
+                                    <option value="1">Not Active</option>
+                                </select>
+                            </div>
+                            <div id="err-IsActive"></div>
+                        </div>
+                        @*<div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:130px;" for="TargetTemperature">Target Temperature <span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="number" id="TargetTemperature" name="TargetTemperature" class="form-control input" data-parsley-required data-parsley-maxlength="20" data-parsley-errors-container="#err-TargetTemperature" autocomplete="off">
+                                </div>
+                                <div id="err-TargetTemperature"></div>
+                            </div>*@
+                    </div>
+                    @*<div class="row ">
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm m-b-5">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" style="width:130px;" for="TimeInterval">Time Interval <span class="text-danger">*</span></label>
+                                    </div>
+                                    <input type="number" id="TimeInterval" name="TimeInterval" class="form-control input" data-parsley-required data-parsley-maxlength="20" data-parsley-errors-container="#err-TimeInterval" autocomplete="off">
+                                </div>
+                                <div id="err-TimeInterval"></div>
+                            </div>
+
+                        </div>*@
+                    <div class="row ">
+                        <div class="col-sm-6">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="ID" id="UserID" class="input" value="0" />
+                    <button type="submit" class="btn btn-sm btn-primary ReadAndWrite" id="btnSaveMachine"> <span class="fa fa-save"></span> <span class="btnLabel"> Save</span></button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelMachine"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade " id="mdlIpAddress" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" id="" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mdlMachineTitle"> Setup IP Address</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form data-parsley-validate id="frmIpAddress">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row ">
+                                <div class="col-sm-6">
+                                    <div class="input-group input-group-sm m-b-5">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" style="width:130px;" for="IpAddress">IP Address <span class="text-danger">*</span></label>
+                                        </div>
+                                        <input type="text" id="IpAddress" name="IpAddress" class="form-control input" data-parsley-required data-parsley-maxlength="20" data-parsley-errors-container="#err-IpAddress" autocomplete="off">
+                                    </div>
+                                    <div id="err-IpAddress"></div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="input-group input-group-sm m-b-5">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" style="width:130px;" for="EffectiveDate">Effective Date <span class="text-danger">*</span></label>
+                                        </div>
+                                        <input type="text" id="EffectiveDate" name="EffectiveDate" class="form-control input hasdatepicker" data-parsley-required data-parsley-maxlength="20" data-parsley-errors-container="#err-EffectiveDate" autocomplete="off">
+                                    </div>
+                                    <div id="err-EffectiveDate"></div>
+                                </div>
+                            </div>
+                            <div class="row ">
+                                <div class="col-sm-6">
+                                    <div class="input-group input-group-sm m-b-5">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" style="width:130px;" for="SensorType">Sensor <span class="text-danger">*</span></label>
+                                        </div>
+                                        <select id="SensorType" name="SensorType" class="form-control input" required data-parsley-errors-container="#err-SensorType" autocomplete="off">
+                                            <option value="">--Please Select--</option>
+                                            <option value="1">Heat</option>
+                                            <option value="2">Water</option>
+                                            <option value="3">Electricity</option>
+                                        </select>
+                                    </div>
+                                    <div id="err-SensorType"></div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="row">
+                                        <input type="hidden" name="ID" id="ipID" class="input" value="0" />
+                                        <div class="col-sm-4 m-b-5 ReadAndWrite">
+                                            <button type="button" id="btnSaveIpAddress" class="btn btn-sm btn-primary btn-block"><span class="fa fa-save"></span><span class="btnLabel"> Save</span></button>
+                                        </div>
+                                        <div class="col-sm-4 m-b-5 ReadAndWrite">
+                                            <button type="button" id="btnEditIpAddress" class="btn btn-sm btn-info btn-block tbl-tr-btns" disabled><span class="fa fa-edit"></span><span class="btnLabel"> Edit</span></button>
+                                        </div>
+                                        <div class="col-sm-4 m-b-5 DeleteEnabled">
+                                            <button type="button" id="btnDeleteIpAddress" class="btn btn-sm btn-danger btn-block tbl-tr-btns" disabled><span class="fa fa-trash-alt"></span><span class="btnLabel"> Delete</span></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="row">
+                                        <div class="col-sm-4 m-b-5">
+                                            <h4>Heat</h4>
+                                            <div class="hljs-wrapper">
+                                                <table id="tblHeatSensor" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4 m-b-5 ">
+                                            <h4>Water</h4>
+                                            <div class="hljs-wrapper">
+                                                <table id="tblWaterSensor" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4 m-b-5 ">
+                                            <h4>Electricity</h4>
+                                            <div class="hljs-wrapper">
+                                                <table id="tblElectricitySensor" class="table zebraStyle  table-bordered tbl-100p" data-adjust="-30"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" id="btnCancelIpAddress"><span class="fa fa-times"></span> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section scripts{
+    @Scripts.Render("~/MachineMaster-JS")
+}

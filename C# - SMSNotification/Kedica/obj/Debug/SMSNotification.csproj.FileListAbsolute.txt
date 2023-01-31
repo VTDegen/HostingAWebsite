@@ -1,0 +1,363 @@
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\ApplicationInsights.config
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\csc.exe
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\vbc.exe
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\EPPlus.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\MySql.Data.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Buffers.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Memory.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Zstandard.Net.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\EPPlus.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.pdb
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Google.Protobuf.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\MySql.Data.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\Renci.SshNet.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Buffers.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Memory.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SMSNotification.csproj.CoreCompileInputs.cache
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SMSNotification.csproj.CopyComplete
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SMSNotification.csprojAssemblyReference.cache
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\SMSNofication.dll.config
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\SMSNofication.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\bin\SMSNofication.pdb
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SMSNofication.Properties.Resources.resources
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SMSNotification.csproj.GenerateResource.cache
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SMSNofication.dll
+C:\Users\jomar.perez\OneDrive - Quantrics\[ Sample Projects ]\My Project\ProjectX\SHIN_ETSU Project\Kedica\obj\Debug\SMSNofication.pdb
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\ApplicationInsights.config
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\csc.exe
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\vbc.exe
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll.config
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\SMSNofication.pdb
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\EPPlus.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\MySql.Data.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\System.Buffers.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\System.Memory.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\Zstandard.Net.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\EPPlus.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.pdb
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\MySql.Data.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\System.Buffers.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\System.Memory.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.Properties.Resources.resources
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.GenerateResource.cache
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CoreCompileInputs.cache
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CopyComplete
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.dll
+C:\Users\JOMAR\OneDrive\Desktop\Random Files\[ Sample Program ]\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.pdb
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\ApplicationInsights.config
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\csc.exe
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\vbc.exe
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll.config
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\SMSNofication.pdb
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\EPPlus.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Logging.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\MySql.Data.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.Buffers.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.Memory.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Twilio.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Zstandard.Net.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\EPPlus.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.pdb
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\MySql.Data.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.Buffers.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.Memory.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\bin\Twilio.xml
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.Properties.Resources.resources
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.GenerateResource.cache
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CoreCompileInputs.cache
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CopyComplete
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.dll
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.pdb
+C:\Users\pjoma\OneDrive\Desktop\Random Files\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csprojAssemblyReference.cache
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\ApplicationInsights.config
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\csc.exe
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\System.Collections.Immutable.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\vbc.exe
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe.config
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll.config
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\SMSNofication.pdb
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\BouncyCastle.Crypto.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\EPPlus.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Logging.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\MySql.Data.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.Buffers.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.Memory.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Twilio.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Ubiety.Dns.Core.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Zstandard.Net.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\EPPlus.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.pdb
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\MySql.Data.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.Buffers.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.Memory.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\bin\Twilio.xml
+D:\RENZ\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.AssemblyReference.cache
+D:\RENZ\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.Properties.Resources.resources
+D:\RENZ\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.GenerateResource.cache
+D:\RENZ\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CoreCompileInputs.cache
+D:\RENZ\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CopyComplete
+D:\RENZ\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.dll
+D:\RENZ\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.pdb
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\ApplicationInsights.config
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\csc.exe
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\System.Collections.Immutable.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\vbc.exe
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe.config
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll.config
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\SMSNofication.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\SMSNofication.pdb
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\BouncyCastle.Crypto.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\EPPlus.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Logging.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\MySql.Data.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.Buffers.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.Memory.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Twilio.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Ubiety.Dns.Core.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Zstandard.Net.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\EPPlus.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.pdb
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Google.Protobuf.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\K4os.Hash.xxHash.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\MySql.Data.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Renci.SshNet.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.Buffers.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.Memory.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\bin\Twilio.xml
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.Properties.Resources.resources
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.GenerateResource.cache
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CoreCompileInputs.cache
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CopyComplete
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.dll
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\obj\Debug\SMSNofication.pdb
+D:\CSharp - SMSNotification\CSharp - SMSNotification\Kedica\obj\Debug\SMSNotification.csprojAssemblyReference.cache
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\ApplicationInsights.config
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\csc.exe
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\vbc.exe
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\SMSNofication.dll.config
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\SMSNofication.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\SMSNofication.pdb
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\EPPlus.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Google.Protobuf.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Logging.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\MySql.Data.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Renci.SshNet.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.Buffers.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.Memory.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Twilio.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Zstandard.Net.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\EPPlus.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Google.Protobuf.pdb
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Google.Protobuf.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\MySql.Data.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Renci.SshNet.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.Buffers.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.Memory.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\bin\Twilio.xml
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csprojAssemblyReference.cache
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\obj\Debug\SMSNofication.Properties.Resources.resources
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.GenerateResource.cache
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CoreCompileInputs.cache
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CopyComplete
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\obj\Debug\SMSNofication.dll
+C:\Users\pjoma\OneDrive\Desktop\Thesis Project\C# - SMSNotification\Kedica\obj\Debug\SMSNofication.pdb
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\ApplicationInsights.config
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\csc.exe
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\vbc.exe
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\SMSNofication.dll.config
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\SMSNofication.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\SMSNofication.pdb
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\BouncyCastle.Crypto.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\EPPlus.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Google.Protobuf.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\K4os.Hash.xxHash.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Logging.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\MySql.Data.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Renci.SshNet.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.Buffers.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.Memory.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Twilio.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Ubiety.Dns.Core.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Zstandard.Net.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\EPPlus.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Google.Protobuf.pdb
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Google.Protobuf.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\K4os.Hash.xxHash.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Microsoft.IdentityModel.Tokens.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\MySql.Data.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Renci.SshNet.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.Buffers.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.IdentityModel.Tokens.Jwt.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.Memory.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\bin\Twilio.xml
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.AssemblyReference.cache
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\obj\Debug\SMSNofication.Properties.Resources.resources
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.GenerateResource.cache
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CoreCompileInputs.cache
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\obj\Debug\SMSNotification.csproj.CopyComplete
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\obj\Debug\SMSNofication.dll
+C:\Users\Diones\Desktop\V11-20230122T013555Z-001\V11\C# - SMSNotification\C# - SMSNotification\Kedica\obj\Debug\SMSNofication.pdb

@@ -1,0 +1,17 @@
+﻿namespace Kedica.Areas.Reports.Models
+{
+    public class RealTimeData
+    {
+        public int ID { get; set; }
+        public int NoData { get; set; }
+        public string GridData { get; set; }
+        public string ElecGridData { get; set; }
+        public string TempElecGridData { get; set; }
+        public decimal Temp { get; set; }
+        public decimal MaxTemp { get; set; }
+        public decimal MaxWater { get; set; }
+        public decimal Elec { get; set; }
+        public decimal Water { get; set; }
+        public string MachineName { get; set; }
+    }
+}

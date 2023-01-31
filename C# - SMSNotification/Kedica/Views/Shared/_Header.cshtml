@@ -1,0 +1,45 @@
+﻿<div id="header" class="header navbar-default">
+    <div class="navbar-header">
+        <a href="/" class="navbar-brand ">
+            <img src="~/Content/assets/img/citycalambalogo.png" />
+        </a>
+        <button type="button" class="navbar-toggle" data-click="sidebar-toggled">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <ul class="navbar-nav navbar-right">
+        @*<li>
+                <form class="navbar-form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Enter keyword" />
+                        <button type="submit" class="btn btn-search"><i class="fa fa-search"></i></button>
+                    </div>
+                </form>
+            </li>*@
+       
+        <li class="dropdown navbar-user">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                
+                <span class="d-none d-md-inline"> <span class="fa fa-cogs"></span></span> <b class="caret"></b>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+              
+                <a href="javascript:;" class="dropdown-item" id="btnLogout">Log Out</a>
+            </div>
+        </li>
+    </ul>
+</div>
+<form action="/Login/Logout" method="POST" id="frmLogout">
+    @Html.AntiForgeryToken()
+    <input type="hidden" value='@Session["ID"].ToString()' name="ID" />
+    <input type="hidden" id="UserNameData" value='@Session["Username"].ToString()' name="Username" />
+</form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#btnLogout").click(function () {
+            $("#frmLogout").submit();
+        });
+    });
+</script>

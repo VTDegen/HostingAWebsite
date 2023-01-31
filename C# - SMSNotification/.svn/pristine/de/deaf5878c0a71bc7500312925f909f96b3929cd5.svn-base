@@ -1,0 +1,1319 @@
+﻿using Kedica.Areas.Transaction.Models;
+using Kedica.Models;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web.Mvc;
+
+namespace Kedica.Areas.Transaction.Controllers
+{
+    public class HydrationProcessController : Controller
+    {
+        DataHelper dataHelper = new DataHelper();
+        List<string> modelErrors = new List<string>();
+        bool error = false;
+        string errmsg = "";
+
+        // GET: Transaction/HydrationProcess
+        public ActionResult Index()
+        {
+            return View("HydrationProcess");
+        }
+        public ActionResult GetHydrationProcessList()
+        {
+            List<tHydration> data = new List<tHydration>();
+            DataTableHelper TypeHelper = new DataTableHelper();
+
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][data]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "HydrationProcess_GetList";
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                data.Add(new tHydration
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    MixerNo = Convert.ToInt32(sdr["MixerNo"]),
+                                    MixerNoValue = sdr["MixerNoValue"].ToString(),
+                                    Cycle = Convert.ToInt32(sdr["Cycle"]),
+                                    CycleValue = sdr["CycleValue"].ToString(),
+                                    ProcessDate = Convert.ToDateTime(sdr["ProcessDate"]).ToString("MM/dd/yyyy"),
+                                    ProductionStaff = Convert.ToInt32(sdr["ProductionStaff"]),
+                                    ProductionStaffValue = sdr["ProductionStaffValue"].ToString(),
+                                    ProcessCode = sdr["ProcessCode"].ToString(),
+                                    Remarks = sdr["Remarks"].ToString(),
+                                    IsCompleted = Convert.ToInt32(sdr["IsCompleted"])
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            int totalrows = data.Count;
+            if (!string.IsNullOrEmpty(searchValue))//filter
+                data = data.Where(x =>
+                    x.MixerNo.ToString().Contains(searchValue.ToLower()) ||
+                    x.MixerNoValue.ToString().Contains(searchValue.ToLower()) ||
+                    x.CycleValue.ToString().Contains(searchValue.ToLower()) ||
+                    x.ProcessDate.ToString().Contains(searchValue.ToLower()) ||
+                    x.ProductionStaff.ToString().Contains(searchValue.ToLower()) ||
+                    x.ProductionStaffValue.ToString().Contains(searchValue.ToLower()) ||
+                    x.ProcessCode.ToString().Contains(searchValue.ToLower()) ||
+                    x.Remarks.ToString().Contains(searchValue.ToLower()) ||
+                    x.Cycle.ToString().Contains(searchValue.ToLower())
+                ).ToList<tHydration>();
+
+            int totalrowsafterfiltering = data.Count;
+            if (sortDirection == "asc")
+                data = data.OrderBy(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            if (sortDirection == "desc")
+                data = data.OrderByDescending(x => TypeHelper.GetPropertyValue(x, sortColumnName)).ToList();
+
+            data = data.Skip(start).Take(length).ToList<tHydration>();
+
+            return Json(new { data = data, draw = Request["draw"], recordsTotal = totalrows, recordsFiltered = totalrowsafterfiltering }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SaveHydrationProcess(tHydration Hydration, List<HydrationTransaction> ProcessData, List<HydrationTransaction> HourlyCheckList, List<HydrationTransaction> AfterFinishedList, HydrationSummary HydrationListSummary)
+        {
+            string endMsg = "";
+            ModelState.Remove("ID");
+            ModelState.Remove("TotalCycleTime");
+            ModelState.Remove("TotalWaterInput");
+            ModelState.Remove("OutputWeight");
+            int HydrationID = 0;
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                    {
+                        conn.Open();
+                        MySqlTransaction transaction;
+                        transaction = conn.BeginTransaction();
+                        try
+                        {
+                            using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                            {
+                                cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                                cmdMyMySql.CommandText = "Hydration_InsertUpdate";
+                                cmdMyMySql.Parameters.Clear();
+                                cmdMyMySql.Parameters.AddWithValue("@_ID_", Hydration.ID);
+                                cmdMyMySql.Parameters.AddWithValue("@_MixerNo", Convert.ToInt32(Hydration.MixerNo));
+                                cmdMyMySql.Parameters.AddWithValue("@_Cycle", Convert.ToInt32(Hydration.Cycle));
+                                cmdMyMySql.Parameters.AddWithValue("@_TemplateID", Convert.ToInt32(Hydration.TemplateID));
+                                cmdMyMySql.Parameters.AddWithValue("@_ProcessDate", Convert.ToDateTime(Hydration.ProcessDate).ToString("yyyy-MM-dd"));
+
+                                cmdMyMySql.Parameters.AddWithValue("@_ProductionStaff", Convert.ToInt32(Hydration.ProductionStaff));
+                                cmdMyMySql.Parameters.AddWithValue("@_Remarks", Hydration.Remarks);
+                                cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+
+                                MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                                MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+                                MySqlParameter HydrationdataID = cmdMyMySql.Parameters.Add("@HydrationID", MySqlDbType.Int32);
+
+                                Error.Direction = ParameterDirection.Output;
+                                ErrorMessage.Direction = ParameterDirection.Output;
+                                HydrationdataID.Direction = ParameterDirection.Output;
+
+                                cmdMyMySql.ExecuteNonQuery();
+                                endMsg = Hydration.ID == 0 ? "saved." : "updated.";
+
+                                error = Convert.ToBoolean(Error.Value);
+                                HydrationID = Convert.ToInt32(HydrationdataID.Value);
+                                if (error)
+                                {
+                                    modelErrors.Add(ErrorMessage.Value.ToString());
+                                }
+                            }
+                            //transaction.Commit();
+                            //conn.Close();
+                            //conn.Open();
+                            //transaction = conn.BeginTransaction();
+                            using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                            {
+
+                                cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                                cmdMyMySql.CommandText = "Hydration_Summary_InsertUpdate";
+                                cmdMyMySql.Parameters.Clear();
+                                cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HydrationID));
+                                cmdMyMySql.Parameters.AddWithValue("@_UnloadingTime", HydrationListSummary.UnloadingTime);
+                                cmdMyMySql.Parameters.AddWithValue("@_OutputWeight", Convert.ToInt32(HydrationListSummary.OutputWeight));
+                                cmdMyMySql.Parameters.AddWithValue("@_TotalCycleTime", HydrationListSummary.TotalCycleTime);
+                                cmdMyMySql.Parameters.AddWithValue("@_TotalWaterInput", Convert.ToInt32(HydrationListSummary.TotalWaterInput));
+                                cmdMyMySql.Parameters.AddWithValue("@_OutputResult", HydrationListSummary.OutputResult);
+                                cmdMyMySql.Parameters.AddWithValue("@_MixingTimeFinished", HydrationListSummary.MixingTimeFinished);
+                                cmdMyMySql.Parameters.AddWithValue("@_MessageType", endMsg);
+                                cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                                cmdMyMySql.ExecuteNonQuery();
+
+                            }
+                            //transaction.Commit();
+                            //conn.Close();
+                            //conn.Open();
+                            //transaction = conn.BeginTransaction();
+                            foreach (var ProcessDataList in ProcessData)
+                            {
+
+                                using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                                {
+                                    cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                                    cmdMyMySql.CommandText = "Hydration_Process_InsertUpdate";
+                                    cmdMyMySql.Parameters.Clear();
+                                    cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HydrationID));
+                                    cmdMyMySql.Parameters.AddWithValue("@_ProcessTemplateData", ProcessDataList.ProcessValue);
+                                    cmdMyMySql.Parameters.AddWithValue("@_ProcessID", Convert.ToInt32(ProcessDataList.ProcessID));
+                                    cmdMyMySql.Parameters.AddWithValue("@_MessageType", endMsg);
+                                    cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                                    cmdMyMySql.ExecuteNonQuery();
+                                }
+                            }
+                            //transaction.Commit();
+                            //conn.Close();
+                            //conn.Open();
+                            //transaction = conn.BeginTransaction();
+                            foreach (var HourlyCheckDataList in HourlyCheckList)
+                            {
+
+                                using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                                {
+                                    cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                                    cmdMyMySql.CommandText = "Hydration_HourlyCheck_InsertUpdate";
+                                    cmdMyMySql.Parameters.Clear();
+                                    cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HydrationID));
+                                    cmdMyMySql.Parameters.AddWithValue("@_HourlyCheckID", HourlyCheckDataList.IntervalID);
+                                    cmdMyMySql.Parameters.AddWithValue("@_TimeSetup", Convert.ToDateTime(HourlyCheckDataList.InvertalValue).ToString("HH:mm:ss"));
+                                    cmdMyMySql.Parameters.AddWithValue("@_HeatTemp", HourlyCheckDataList.HitTemp == null ? Convert.ToDecimal(0).ToString() : Convert.ToDecimal(HourlyCheckDataList.HitTemp).ToString());
+                                    cmdMyMySql.Parameters.AddWithValue("@_WaterTemp", HourlyCheckDataList.WaterTemp == null ? Convert.ToDecimal(0).ToString() : Convert.ToDecimal(HourlyCheckDataList.WaterTemp).ToString());
+                                    cmdMyMySql.Parameters.AddWithValue("@_MessageType", endMsg);
+                                    cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                                    cmdMyMySql.ExecuteNonQuery();
+                                }
+                            }
+                            //transaction.Commit();
+                            //conn.Close();
+                            //conn.Open();
+                            //transaction = conn.BeginTransaction();
+                            foreach (var AfterFinishedDataList in AfterFinishedList)
+                            {
+                                using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                                {
+                                    string sampledata = Convert.ToDateTime(AfterFinishedDataList.InvertalValue).ToString("HH:mm:ss");
+                                    cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                                    cmdMyMySql.CommandText = "Hydration_AFC_InsertUpdate";
+                                    cmdMyMySql.Parameters.Clear();
+                                    cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HydrationID));
+                                    cmdMyMySql.Parameters.AddWithValue("@_AfterCycleID", AfterFinishedDataList.IntervalID);
+                                    cmdMyMySql.Parameters.AddWithValue("@_TimeCheck", AfterFinishedDataList.InvertalValue == null ? "" : Convert.ToDateTime(AfterFinishedDataList.InvertalValue).ToString("HH:mm:ss"));
+                                    cmdMyMySql.Parameters.AddWithValue("@_TempCheck", AfterFinishedDataList.HitTemp == null ? Convert.ToDecimal(0).ToString() : Convert.ToDecimal(AfterFinishedDataList.HitTemp).ToString());
+                                    cmdMyMySql.Parameters.AddWithValue("@_Judgement", AfterFinishedDataList.Judgement == null ? "".ToString() : AfterFinishedDataList.Judgement.ToString());
+                                    cmdMyMySql.Parameters.AddWithValue("@_MessageType", endMsg);
+                                    cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                                    cmdMyMySql.ExecuteNonQuery();
+                                }
+                            }
+                            transaction.Commit();
+                            conn.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            modelErrors.Add("An error occured: " + ex.Message);
+                            try
+                            {
+                                transaction.Rollback();
+                            }
+                            catch (Exception ex2)
+                            {
+                                modelErrors.Add("An error occured: " + ex2.Message);
+                            }
+                        }
+
+                    }
+                }
+                catch (Exception err)
+                {
+                    string errmsg;
+                    if (err.InnerException != null)
+                        errmsg = "Error: " + err.InnerException.ToString();
+                    else
+                        errmsg = "Error: " + err.Message.ToString();
+
+                    return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                foreach (var modelStateKey in ViewData.ModelState.Keys)
+                {
+                    var modelStateVal = ViewData.ModelState[modelStateKey];
+                    foreach (var error in modelStateVal.Errors)
+                    {
+                        var key = modelStateKey;
+                        var errMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                        modelErrors.Add(errMessage);
+                    }
+                }
+            }
+            if (modelErrors.Count != 0 || error)
+                return Json(new { success = false, errors = modelErrors });
+            else
+            {
+                return Json(new { success = true, msg = "Hydration Process was successfully " + endMsg });
+            }
+        }
+        public ActionResult GetHydrationDetails(int ID, int TemplateID)
+        {
+            tHydration hydrationDetails = new tHydration();
+            List<HydrationHourlyChecking> hydrationTransaction = new List<HydrationHourlyChecking>();
+            List<HydrationAfterCycle> hydrationAfterCycle = new List<HydrationAfterCycle>();
+            ArrayList HydrationProcessDetails = new ArrayList();
+            ArrayList HydrationHourlyDetails = new ArrayList();
+            ArrayList HydrationAfterCycleDetails = new ArrayList();
+            HydrationSummary HydrationSummaryDetails = new HydrationSummary();
+            string CurrentProcessDate = "";
+            int HourlyChecking = 1;
+            string TempProcessDate = "";
+            string TempProcessTimeStart = "";
+            string FinalProcessDate = "";
+            bool isFound = true;
+            int CheckCounter = 0;
+            int CheckNGCounter = 0;
+            int isFoundTransactionHistory = 0;
+            int CountListCounter = 0;
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_GetDatalist";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            hydrationDetails.ID = Convert.ToInt32(sdr["ID"]);
+                            hydrationDetails.MixerNo = Convert.ToInt32(sdr["MixerNo"]);
+                            hydrationDetails.MixerNoValue = sdr["MixerNoValue"].ToString();
+                            hydrationDetails.Cycle = Convert.ToInt32(sdr["Cycle"]);
+                            hydrationDetails.CycleValue = sdr["CycleValue"].ToString();
+                            hydrationDetails.ProcessDate = Convert.ToDateTime(sdr["ProcessDate"]).ToString("MM/dd/yyyy");
+                            TempProcessDate = Convert.ToDateTime(sdr["ProcessDate"]).ToString("yyyy-MM-dd");
+                            hydrationDetails.ProductionStaff = Convert.ToInt32(sdr["ProductionStaff"]);
+                            hydrationDetails.ProductionStaffValue = sdr["ProductionStaffValue"].ToString();
+                            hydrationDetails.ProcessCode = sdr["ProcessCode"].ToString();
+                            hydrationDetails.Remarks = sdr["Remarks"].ToString();
+                        }
+                    }
+                    conn.Close();
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.Text;
+                        cmdMyMySql.CommandText = "SELECT count(*) as CountData FROM tHydrationAFCHistory where HydrationID = @_HydrationID";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                isFoundTransactionHistory = Convert.ToInt32(sdr["CountData"]);
+                            }
+                        }
+                    }
+                    conn.Close();
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_GetCurrentProcessDate";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                CurrentProcessDate = Convert.ToDateTime(sdr["CurrentDate"]).ToString("MM/dd/yyyy");
+                            }
+                        }
+                    }
+                    conn.Close();
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.Text;
+                        cmdMyMySql.CommandText = "SELECT count(*) as Countdata FROM tHydrationHourlyCheck where HydrationID = @_HydrationID and HeatTemp != '0.00'";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                CountListCounter = Convert.ToInt32(sdr["CountData"]);
+                            }
+                        }
+                    }
+                    conn.Close();
+                    FinalProcessDate = CurrentProcessDate == "" ? TempProcessDate : CurrentProcessDate;
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_Process_GetDatalist";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                HydrationProcessDetails.Add(new
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    ProcessID = Convert.ToInt32(sdr["ProcessID"]),
+                                    ProcessDataValue = sdr["ProcessTemplateData"].ToString(),
+                                    ProcessValue = sdr["ProcessValue"].ToString(),
+                                    Datatype = sdr["Datatype"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                    int HourlyCheckCounter = 1;
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_HourlyCheck_GetDatalist";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@_TempProcessDate", Convert.ToDateTime(FinalProcessDate).ToString("yyyy-MM-dd"));
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                if (isFoundTransactionHistory == 0)
+                                {
+                                    HydrationHourlyDetails.Add(new
+                                    {
+                                        ID = Convert.ToInt32(sdr["ID"]),
+                                        HydrationID = Convert.ToInt32(ID),
+                                        InvertalValue = Convert.ToDateTime(sdr["TimeSetup"].ToString()).ToString("hh:mm tt"),
+                                        HitTemp = sdr["HeatTemp"].ToString(),
+                                        LatestDate = sdr["LatestDate"].ToString(),
+                                        WaterTemp = sdr["WaterTemp"].ToString(),
+                                        Interval = Convert.ToDecimal(sdr["Interval"]),
+                                        CycleCount = Convert.ToDecimal(sdr["CycleCount"]),
+                                        HCounter = Convert.ToInt32(HourlyChecking),
+                                    });
+                                    hydrationTransaction.Add(new HydrationHourlyChecking
+                                    {
+                                        ID = Convert.ToInt32(sdr["ID"]),
+                                        InvertalValue = sdr["TimeSetup"].ToString(),
+                                        HitTemp = sdr["HeatTemp"].ToString(),
+                                        WaterTemp = sdr["WaterTemp"].ToString(),
+                                        Interval = Convert.ToDecimal(sdr["Interval"]),
+                                        CycleCount = Convert.ToDecimal(sdr["CycleCount"]),
+                                        HCounter = Convert.ToInt32(HourlyChecking),
+                                    });
+                                }
+                                else
+                                {
+                                    if (HourlyCheckCounter <= CountListCounter)
+                                    {
+                                        HydrationHourlyDetails.Add(new
+                                        {
+                                            ID = Convert.ToInt32(sdr["ID"]),
+                                            HydrationID = Convert.ToInt32(ID),
+                                            InvertalValue = Convert.ToDateTime(sdr["TimeSetup"].ToString()).ToString("hh:mm tt"),
+                                            HitTemp = sdr["HeatTemp"].ToString(),
+                                            LatestDate = sdr["LatestDate"].ToString(),
+                                            WaterTemp = sdr["WaterTemp"].ToString(),
+                                            Interval = Convert.ToDecimal(sdr["Interval"]),
+                                            CycleCount = Convert.ToDecimal(sdr["CycleCount"]),
+                                            HCounter = Convert.ToInt32(HourlyChecking),
+                                        });
+                                        hydrationTransaction.Add(new HydrationHourlyChecking
+                                        {
+                                            ID = Convert.ToInt32(sdr["ID"]),
+                                            InvertalValue = sdr["TimeSetup"].ToString(),
+                                            HitTemp = sdr["HeatTemp"].ToString(),
+                                            WaterTemp = sdr["WaterTemp"].ToString(),
+                                            Interval = Convert.ToDecimal(sdr["Interval"]),
+                                            CycleCount = Convert.ToDecimal(sdr["CycleCount"]),
+                                            HCounter = Convert.ToInt32(HourlyChecking),
+                                        });
+                                    }
+                                }
+                                HourlyCheckCounter++;
+                                HourlyChecking++;
+                            }
+                        }
+                    }
+
+                    conn.Close();
+
+                    if (isFoundTransactionHistory == 0)
+                    {
+                        for (int i = 0; i < hydrationTransaction.Count; i++)
+                        {
+                            if (i == hydrationTransaction.Count - 3)
+                            {
+                                if (isFound)
+                                {
+                                    int FirstHitTEmp = hydrationTransaction[i].HitTemp == "" ? 60 : Convert.ToInt32(Convert.ToDecimal(hydrationTransaction[i].HitTemp));
+
+                                    if (FirstHitTEmp <= 59)
+                                    {
+                                        isFound = false;
+                                        TempProcessTimeStart = hydrationTransaction[i].InvertalValue;
+                                    }
+
+                                }
+                            }
+                            else if (i == hydrationTransaction.Count - 2)
+                            {
+                                if (isFound)
+                                {
+                                    int FirstHitTEmp = hydrationTransaction[i].HitTemp == "" ? 60 : Convert.ToInt32(Convert.ToDecimal(hydrationTransaction[i].HitTemp));
+
+                                    if (FirstHitTEmp <= 59)
+                                    {
+                                        isFound = false;
+                                        TempProcessTimeStart = hydrationTransaction[i].InvertalValue;
+                                    }
+
+                                }
+                            }
+                            else if (i == hydrationTransaction.Count - 1)
+                            {
+
+                                if (isFound)
+                                {
+                                    int FirstHitTEmp = hydrationTransaction[i].HitTemp == "" ? 60 : Convert.ToInt32(Convert.ToDecimal(hydrationTransaction[i].HitTemp));
+
+                                    if (FirstHitTEmp <= 59)
+                                    {
+                                        isFound = false;
+                                        TempProcessTimeStart = hydrationTransaction[i].InvertalValue;
+                                    }
+                                    else
+                                    {
+                                        TempProcessTimeStart = hydrationTransaction[i].InvertalValue;
+                                        isFound = false;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        TempProcessTimeStart = hydrationTransaction[hydrationTransaction.Count - 1].InvertalValue;
+                    }
+
+
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_AfterCycle_GetDataTemplist";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_DateTransaction", Convert.ToDateTime(FinalProcessDate).ToString("yyyy-MM-dd"));
+                        cmdMyMySql.Parameters.AddWithValue("@_TimeTransaction", TempProcessTimeStart);
+                        cmdMyMySql.Parameters.AddWithValue("@_TemplateID", TemplateID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                hydrationAfterCycle.Add(new HydrationAfterCycle
+                                {
+
+                                    TimeCheck = sdr["TimeCheck"].ToString(),
+                                    TempCheck = sdr["TempCheck"].ToString(),
+                                    Interval = Convert.ToDecimal(sdr["Interval"]),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                    int IDCounter = 1;
+                    bool isCheckData = true;
+                    for (int zi = 1; zi < hydrationAfterCycle.Count; zi++)
+                    {
+                        string JudgementType = "";
+                        if (Convert.ToInt32(Convert.ToDecimal(hydrationAfterCycle[zi].TempCheck)) <= 59)
+                        {
+                            CheckCounter++;
+                            JudgementType = "OK";
+                            if (CheckNGCounter <= 1)
+                            {
+                                if (CheckNGCounter == 1)
+                                {
+                                    CheckNGCounter++;
+                                    isCheckData = false;
+                                }
+                                else
+                                {
+                                    CheckNGCounter = 0;
+                                }
+                            }
+                            if (CheckCounter == 4)
+                            {
+                                CheckCounter++;
+                                isCheckData = false;
+                            }
+                        }
+                        else
+                        {
+                            if (CheckCounter <= 3)
+                            {
+                                if (CheckCounter == 3)
+                                {
+                                    CheckCounter++;
+                                    isCheckData = false;
+                                }
+                                else
+                                {
+                                    CheckCounter = 0;
+                                }
+                            }
+                            if (CheckNGCounter <= 1)
+                            {
+                                if (CheckNGCounter == 1)
+                                {
+                                    CheckNGCounter++;
+                                    isCheckData = false;
+                                }
+                            }
+                            CheckNGCounter++;
+                            JudgementType = "NG";
+                        }
+
+                        if (isCheckData)
+                        {
+                            HydrationAfterCycleDetails.Add(new
+                            {
+                                ID = Convert.ToInt32(IDCounter),
+                                HydrationID = Convert.ToInt32(ID),
+                                CycleCount = Convert.ToInt32(IDCounter),
+                                InvertalValue = hydrationAfterCycle[zi].TimeCheck,
+                                ConvertedTime = Convert.ToDateTime(hydrationAfterCycle[zi].TimeCheck).ToString("h:mm tt"),
+                                HitTemp = hydrationAfterCycle[zi].TempCheck,
+                                Judgement = JudgementType,
+                                HCounter = Convert.ToInt32(HourlyChecking),
+                                Interval = hydrationAfterCycle[zi].Interval,
+                            });
+                            IDCounter++;
+                        }
+                    }
+
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_Summary_GetDatalist";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            if (!sdr.Read())
+                                throw new InvalidOperationException("No records found.");
+
+                            HydrationSummaryDetails.UnloadingTime = sdr["UnloadingTime"].ToString();
+                            HydrationSummaryDetails.OutputWeight = Convert.ToInt32(sdr["OutputWeight"]);
+                            HydrationSummaryDetails.TotalCycleTime = sdr["TotalCycleTime"].ToString();
+                            HydrationSummaryDetails.TotalWaterInput = Convert.ToInt32(sdr["TotalWaterInput"]);
+                            HydrationSummaryDetails.OutputResult = sdr["OuputResult"].ToString();
+                            HydrationSummaryDetails.MixingTimeFinished = sdr["MixingTimeFinished"].ToString();
+
+                        }
+                    }
+                    conn.Close();
+
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new
+                {
+                    success = false,
+                    errors = errmsg
+                }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    hydrationData = hydrationDetails,
+                    HydrationProcessData = HydrationProcessDetails,
+                    HydrationHourlyData = HydrationHourlyDetails,
+                    HydrationAfterCycleData = HydrationAfterCycleDetails,
+                    HydrationSummaryData = HydrationSummaryDetails,
+                    CurrentProcessDate = CurrentProcessDate,
+                    isFoundTransactionHistory = isFoundTransactionHistory
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult DeleteHydration(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_Delete";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                        MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                        Error.Direction = ParameterDirection.Output;
+                        ErrorMessage.Direction = ParameterDirection.Output;
+
+                        cmdMyMySql.ExecuteNonQuery();
+
+                        error = Convert.ToBoolean(Error.Value);
+                        if (error)
+                        {
+                            modelErrors.Add(ErrorMessage.Value.ToString());
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Hydration Process was successfully deleted." });
+
+        }
+        public ActionResult GetHourlyCheckingDetails(int ID)
+        {
+            ArrayList HourlyProcess = new ArrayList();
+            ArrayList AfterFinishedCycle = new ArrayList();
+            ArrayList ProcessList = new ArrayList();
+            int HourlyChecking = 1;
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdSql = conn.CreateCommand())
+                    {
+                        cmdSql.CommandType = CommandType.StoredProcedure;
+                        cmdSql.CommandText = "Template_HourlyChecking_GetDatalist";
+                        cmdSql.Parameters.Clear();
+                        cmdSql.Parameters.AddWithValue("@_TemplateID", ID);
+
+                        using (MySqlDataReader sdr = cmdSql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                HourlyProcess.Add(new
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    CycleCount = Convert.ToInt32(sdr["CycleCount"]),
+                                    Interval = Convert.ToDecimal(sdr["Interval"]),
+                                    TempCut = Convert.ToDecimal(sdr["TempCut"]),
+                                    HCounter = Convert.ToInt32(HourlyChecking)
+                                });
+                                HourlyChecking++;
+                            }
+                        }
+                    }
+                    conn.Close();
+                    HourlyChecking++;
+                    conn.Open();
+                    using (MySqlCommand cmdSql = conn.CreateCommand())
+                    {
+                        cmdSql.CommandType = CommandType.StoredProcedure;
+                        cmdSql.CommandText = "Template_AfterCycle_GetDatalist";
+                        cmdSql.Parameters.Clear();
+                        cmdSql.Parameters.AddWithValue("@_TemplateID", ID);
+
+                        using (MySqlDataReader sdr = cmdSql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                AfterFinishedCycle.Add(new
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    CycleCount = Convert.ToInt32(sdr["CycleCount"]),
+                                    Interval = Convert.ToDecimal(sdr["Interval"]),
+                                    TempLimit = Convert.ToDecimal(sdr["TempLimit"]),
+                                    HCounter = Convert.ToInt32(HourlyChecking),
+
+                                });
+                                HourlyChecking++;
+                            }
+                        }
+                    }
+                    conn.Close();
+                    conn.Open();
+                    using (MySqlCommand cmdSql = conn.CreateCommand())
+                    {
+                        cmdSql.CommandType = CommandType.StoredProcedure;
+                        cmdSql.CommandText = "Template_ProcessList_GetDatalist";
+                        cmdSql.Parameters.Clear();
+                        cmdSql.Parameters.AddWithValue("@_TemplateID", ID);
+
+                        using (MySqlDataReader sdr = cmdSql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                ProcessList.Add(new
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    ProcessValue = sdr["ProcessValue"].ToString(),
+                                    ProcessID = Convert.ToDecimal(sdr["ProcessID"]),
+                                    Datatype = sdr["Datatype"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "An error occured: " + err.InnerException.ToString();
+                else
+                    errmsg = "An error occured: " + err.Message.ToString();
+
+                return Json(new { success = false, msg = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, data = new { HourlyProcess = HourlyProcess, AfterFinishedCycle = AfterFinishedCycle, ProcessList = ProcessList } }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult CompletedHydration(int ID)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_Completed";
+
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@UpdateID", Session["UserName"]);
+
+                        MySqlParameter ErrorMessage = cmdMyMySql.Parameters.Add("@ErrorMessage", MySqlDbType.VarChar, 50);
+                        MySqlParameter Error = cmdMyMySql.Parameters.Add("@IsError", MySqlDbType.Bit);
+
+                        Error.Direction = ParameterDirection.Output;
+                        ErrorMessage.Direction = ParameterDirection.Output;
+
+                        cmdMyMySql.ExecuteNonQuery();
+
+                        error = Convert.ToBoolean(Error.Value);
+                        if (error)
+                        {
+                            modelErrors.Add(ErrorMessage.Value.ToString());
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true, msg = "Hydration Process was successfully completed." });
+
+        }
+        public ActionResult SaveCurrentListData(List<HydrationHourlyCheckingHistory> HourlyCheckingList, List<HydrationAfterCycleHistory> AfterCycleList)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    //Save and Update Hourly Checking
+                    conn.Open();
+                    foreach (var HourlyCheckDataList in HourlyCheckingList)
+                    {
+                        using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                        {
+                            cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMyMySql.CommandText = "Hydration_HourlyCheck_InsertHistory";
+                            cmdMyMySql.Parameters.Clear();
+                            cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HourlyCheckDataList.HydrationID));
+                            cmdMyMySql.Parameters.AddWithValue("@_CycleCount", Convert.ToInt32(HourlyCheckDataList.CycleCount));
+                            cmdMyMySql.Parameters.AddWithValue("@_HitTemp", Convert.ToDecimal(HourlyCheckDataList.HitTemp));
+                            cmdMyMySql.Parameters.AddWithValue("@_InvertalValue", HourlyCheckDataList.InvertalValue);
+                            cmdMyMySql.Parameters.AddWithValue("@_WaterTemp", Convert.ToDecimal(HourlyCheckDataList.WaterTemp));
+                            cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                            cmdMyMySql.ExecuteNonQuery();
+                        }
+                    }
+                    conn.Close();
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_HourlyCheck_UpdateHistory";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HourlyCheckingList[0].HydrationID));
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                    //Save and Update After Cycle 
+                    conn.Open();
+                    foreach (var AfterCycleDataList in AfterCycleList)
+                    {
+                        using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                        {
+                            cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMyMySql.CommandText = "Hydration_AfterCycle_InsertHistory";
+                            cmdMyMySql.Parameters.Clear();
+                            cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(AfterCycleDataList.HydrationID));
+                            cmdMyMySql.Parameters.AddWithValue("@_CycleCount", Convert.ToInt32(AfterCycleDataList.CycleCount));
+                            cmdMyMySql.Parameters.AddWithValue("@_ConvertedTime", AfterCycleDataList.ConvertedTime);
+                            cmdMyMySql.Parameters.AddWithValue("@_HitTemp", Convert.ToDecimal(AfterCycleDataList.HitTemp));
+                            cmdMyMySql.Parameters.AddWithValue("@_Judgement", AfterCycleDataList.Judgement);
+                            cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                            cmdMyMySql.ExecuteNonQuery();
+                        }
+                    }
+                    conn.Close();
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_AfterCycle_UpdateHistory";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HourlyCheckingList[0].HydrationID));
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true });
+        }
+        public ActionResult SaveLatestHourlyCheckData(List<HydrationTransaction> HourlyCheckList, int HydrationID, string CurrentDate)
+        {
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    string endmsg = "updated";
+                    //Save and Update Hourly Checking
+                    conn.Open();
+                    foreach (var HourlyCheckDataList in HourlyCheckList)
+                    {
+
+                        using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                        {
+                            cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                            cmdMyMySql.CommandText = "Hydration_HourlyCheck_InsertUpdate";
+                            cmdMyMySql.Parameters.Clear();
+                            cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HydrationID));
+                            cmdMyMySql.Parameters.AddWithValue("@_HourlyCheckID", HourlyCheckDataList.IntervalID);
+                            cmdMyMySql.Parameters.AddWithValue("@_TimeSetup", Convert.ToDateTime(HourlyCheckDataList.InvertalValue).ToString("HH:mm:ss"));
+                            cmdMyMySql.Parameters.AddWithValue("@_HeatTemp", HourlyCheckDataList.HitTemp == null ? Convert.ToDecimal(0).ToString() : Convert.ToDecimal(HourlyCheckDataList.HitTemp).ToString());
+                            cmdMyMySql.Parameters.AddWithValue("@_WaterTemp", HourlyCheckDataList.WaterTemp == null ? Convert.ToDecimal(0).ToString() : Convert.ToDecimal(HourlyCheckDataList.WaterTemp).ToString());
+                            cmdMyMySql.Parameters.AddWithValue("@_MessageType", endmsg);
+                            cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                            cmdMyMySql.ExecuteNonQuery();
+                        }
+                    }
+                    conn.Close();
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_SaveCurrentDate";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", Convert.ToInt32(HydrationID));
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationCurrentDate", CurrentDate);
+                        cmdMyMySql.Parameters.AddWithValue("@_CreateID", Session["UserName"]);
+                        cmdMyMySql.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new { success = false, errors = errmsg }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { success = true });
+        }
+        public ActionResult RetrieveUpdatedList(int ID, string ProcessDate, int TemplateID)
+        {
+            tHydration hydrationDetails = new tHydration();
+            List<HydrationHourlyChecking> hydrationTransaction = new List<HydrationHourlyChecking>();
+            List<HydrationAfterCycle> hydrationAfterCycle = new List<HydrationAfterCycle>();
+            ArrayList HydrationProcessDetails = new ArrayList();
+            ArrayList HydrationHourlyDetails = new ArrayList();
+            ArrayList HydrationAfterCycleDetails = new ArrayList();
+            HydrationSummary HydrationSummaryDetails = new HydrationSummary();
+            int HourlyChecking = 1;
+            string TempProcessTimeStart = "";
+            bool isFound = true;
+            int CheckCounter = 0;
+            int CheckNGCounter = 0;
+
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_HourlyCheck_GetDatalist";
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", ID);
+                        cmdMyMySql.Parameters.AddWithValue("@_TempProcessDate", ProcessDate);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+
+                                hydrationTransaction.Add(new HydrationHourlyChecking
+                                {
+                                    ID = Convert.ToInt32(sdr["ID"]),
+                                    InvertalValue = sdr["TimeSetup"].ToString(),
+                                    LatestDate = sdr["LatestDate"].ToString(),
+                                    HitTemp = sdr["HeatTemp"].ToString(),
+                                    WaterTemp = sdr["WaterTemp"].ToString(),
+                                    Interval = Convert.ToDecimal(sdr["Interval"]),
+                                    CycleCount = Convert.ToDecimal(sdr["CycleCount"]),
+                                    HCounter = Convert.ToInt32(HourlyChecking),
+                                });
+                                HourlyChecking++;
+                            }
+                        }
+                    }
+
+                    conn.Close();
+                    for (int i = 0; i < hydrationTransaction.Count; i++)
+                    {
+                        if (isFound)
+                        {
+                            int FirstHitTEmp = hydrationTransaction[i].HitTemp == "" ? 60 : Convert.ToInt32(Convert.ToDecimal(hydrationTransaction[i].HitTemp));
+
+                            if (FirstHitTEmp <= 59)
+                            {
+                                isFound = false;
+                                TempProcessTimeStart = hydrationTransaction[i].InvertalValue;
+                            }
+
+                            HydrationHourlyDetails.Add(new
+                            {
+                                ID = Convert.ToInt32(hydrationTransaction[i].ID),
+                                HydrationID = Convert.ToInt32(ID),
+                                InvertalValue = Convert.ToDateTime(hydrationTransaction[i].InvertalValue).ToString("hh:mm tt"),
+                                HitTemp = hydrationTransaction[i].HitTemp.ToString(),
+                                LatestDate = hydrationTransaction[i].LatestDate.ToString(),
+                                WaterTemp = hydrationTransaction[i].WaterTemp.ToString(),
+                                Interval = Convert.ToDecimal(hydrationTransaction[i].Interval),
+                                CycleCount = Convert.ToDecimal(hydrationTransaction[i].CycleCount),
+                                HCounter = Convert.ToInt32(i + 1),
+                            });
+
+                        }
+                    }
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_AfterCycle_GetDataTemplist";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_DateTransaction", ProcessDate);
+                        cmdMyMySql.Parameters.AddWithValue("@_TimeTransaction", TempProcessTimeStart);
+                        cmdMyMySql.Parameters.AddWithValue("@_TemplateID", TemplateID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                hydrationAfterCycle.Add(new HydrationAfterCycle
+                                {
+
+                                    TimeCheck = sdr["TimeCheck"].ToString(),
+                                    TempCheck = sdr["TempCheck"].ToString(),
+                                    Interval = Convert.ToDecimal(sdr["Interval"]),
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                    int IDCounter = 1;
+                    bool isCheckData = true;
+                    for (int zi = 1; zi < hydrationAfterCycle.Count; zi++)
+                    {
+                        string JudgementType = "";
+                        if (Convert.ToInt32(Convert.ToDecimal(hydrationAfterCycle[zi].TempCheck)) <= 59)
+                        {
+                            CheckCounter++;
+                            JudgementType = "OK";
+                            if (CheckNGCounter <= 1)
+                            {
+                                if (CheckNGCounter == 1)
+                                {
+                                    CheckNGCounter++;
+                                    isCheckData = false;
+                                }
+                                else
+                                {
+                                    CheckNGCounter = 0;
+                                }
+                            }
+                            if (CheckCounter == 4)
+                            {
+                                CheckCounter++;
+                                isCheckData = false;
+                            }
+                        }
+                        else
+                        {
+                            if (CheckCounter <= 3)
+                            {
+                                if (CheckCounter == 3)
+                                {
+                                    CheckCounter++;
+                                    isCheckData = false;
+                                }
+                                else
+                                {
+                                    CheckCounter = 0;
+                                }
+                            }
+                            if (CheckNGCounter <= 1)
+                            {
+                                if (CheckNGCounter == 1)
+                                {
+                                    CheckNGCounter++;
+                                    isCheckData = false;
+                                }
+                            }
+                            CheckNGCounter++;
+                            JudgementType = "NG";
+                        }
+
+                        if (isCheckData)
+                        {
+                            HydrationAfterCycleDetails.Add(new
+                            {
+                                ID = Convert.ToInt32(IDCounter),
+                                HydrationID = Convert.ToInt32(ID),
+                                CycleCount = Convert.ToInt32(IDCounter),
+                                InvertalValue = hydrationAfterCycle[zi].TimeCheck,
+                                ConvertedTime = Convert.ToDateTime(hydrationAfterCycle[zi].TimeCheck).ToString("h:mm tt"),
+                                HitTemp = hydrationAfterCycle[zi].TempCheck,
+                                Judgement = JudgementType,
+                                HCounter = Convert.ToInt32(HourlyChecking),
+                                Interval = hydrationAfterCycle[zi].Interval,
+                            });
+                            IDCounter++;
+                        }
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new
+                {
+                    success = false,
+                    errors = errmsg
+                }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    HydrationHourlyData = HydrationHourlyDetails,
+                    HydrationAfterCycleData = HydrationAfterCycleDetails
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetTransactionHistory(int HydrationID)
+        {
+            ArrayList TransactionResultList = new ArrayList();
+            ArrayList HourlyChecking_TransactionResultListData = new ArrayList();
+            ArrayList AfterCycle_TransactionResultListData = new ArrayList();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["SHIN-ETSU-MYSQL"].ConnectionString.ToString()))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_GetHistoryTransactionList";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", HydrationID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                TransactionResultList.Add(new
+                                {
+                                    DataCycleCounter = Convert.ToInt32(sdr["DataCycleCounter"])
+                                });
+                            }
+                        }
+                    }
+                    conn.Close();
+                    int HourlyCheckCounter = 1;
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_HourlyChecking_GetHistoryTransactionListData";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", HydrationID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                HourlyChecking_TransactionResultListData.Add(new
+                                {
+                                    ID = Convert.ToInt32(HourlyCheckCounter),
+                                    DataCycleCounter = Convert.ToInt32(sdr["DataCycleCounter"]),
+                                    CycleCount = Convert.ToInt32(sdr["CycleCount"]),
+                                    TimeSetup = sdr["TimeSetup"].ToString(),
+                                    HeatTemp = Convert.ToDecimal(sdr["HeatTemp"]),
+                                    WaterTemp = Convert.ToDecimal(sdr["WaterTemp"])
+                                });
+                                HourlyCheckCounter++;
+                            }
+                        }
+                    }
+                    conn.Close();
+                    int AfterCycleCounter = 1;
+                    conn.Open();
+                    using (MySqlCommand cmdMyMySql = conn.CreateCommand())
+                    {
+                        cmdMyMySql.CommandType = CommandType.StoredProcedure;
+                        cmdMyMySql.CommandText = "Hydration_AfterCycle_GetHistoryTransactionListData";
+                        cmdMyMySql.Parameters.Clear();
+                        cmdMyMySql.Parameters.AddWithValue("@_HydrationID", HydrationID);
+                        using (MySqlDataReader sdr = cmdMyMySql.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                AfterCycle_TransactionResultListData.Add(new
+                                {
+                                    ID = Convert.ToInt32(AfterCycleCounter),
+                                    DataCycleCounter = Convert.ToInt32(sdr["DataCycleCounter"]),
+                                    CycleCount = Convert.ToInt32(sdr["CycleCount"]),
+                                    TimeCheck = sdr["TimeCheck"].ToString(),
+                                    TempCheck = Convert.ToDecimal(sdr["TempCheck"]),
+                                    Judgement = sdr["Judgement"].ToString()
+                                });
+                                AfterCycleCounter++;
+                            }
+                        }
+                    }
+                    conn.Close();
+
+                }
+            }
+            catch (Exception err)
+            {
+                string errmsg;
+                if (err.InnerException != null)
+                    errmsg = "Error: " + err.InnerException.ToString();
+                else
+                    errmsg = "Error: " + err.Message.ToString();
+
+                return Json(new
+                {
+                    success = false,
+                    errors = errmsg
+                }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    TransactionResultList = TransactionResultList,
+                    HourlyCheckingTransactionResultListData = HourlyChecking_TransactionResultListData,
+                    AfterCycleTransactionResultListData = AfterCycle_TransactionResultListData
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
+    }
+}

@@ -1,0 +1,66 @@
+﻿"use strict";
+(function () {
+    const HPCMonitoring = function () {
+        return new HPCMonitoring.init();
+    }
+    HPCMonitoring.init = function () {
+        $D.init.call(this);
+        this.MachineList = "";
+        this.ArrMachineList = [];
+    }
+    HPCMonitoring.prototype = {
+        GenerateExcel: function (ProcessDate) {
+            var self = this;
+            window.location = '/Reports/HPCMonitoringSheet/GenerateHPCData?ProcessDate=' + ProcessDate + "&MixerList=" + self.MachineList;
+            return this;
+        }
+    };
+    HPCMonitoring.init.prototype = $.extend(HPCMonitoring.prototype, $D.init.prototype);
+    HPCMonitoring.init.prototype = HPCMonitoring.prototype;
+    $(document).ready(function () {
+        var HPC = HPCMonitoring();
+        $("#FilterTransactionDate").datepicker({ todayHighlight: true, autoclose: true, format: "yyyy-mm-dd" });
+        $('#FilterMachineID').select2({
+            ajax: {
+                url: "/General/MySQLGetSelect2Data",
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        id: 'ID',
+                        text: "MachineName",
+                        table: 'mMachine',
+                        db: 'SHIN-ETSU-MYSQL',
+                        condition: ' AND IsDeleted=0 ',
+                        display: 'id&text',
+                    };
+                },
+            },
+            placeholder: '--Please Select Machine ID--',
+            sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),
+        });
+        $("#btnFilterHPC").click(function () {
+            HPC.MachineList = "";
+            HPC.ArrMachineList = [];
+            var vhtml = "";
+            var MachineLength = $("#FilterMachineID").val().length;
+            var lastRow = $("#FilterMachineID").val().length - 1;
+            var MachineData = $("#FilterMachineID").val();
+            var ProcessDate = $("#FilterTransactionDate").val();
+            var counter = 0;
+            for (var i = 0; i < MachineLength; i++) {
+                if (counter === lastRow) {
+                    vhtml += "'" + MachineData[counter] + "'";
+                }
+                else {
+                    vhtml += "'" + MachineData[counter] + "'" + ",";
+                }
+                counter++;
+            }
+            HPC.MachineList = vhtml;
+            HPC.GenerateExcel(ProcessDate);
+        });
+        $("#btnCancelDataHPC").click(function () {
+            HPC.clearFromData("frmFilterHPC");
+        });
+    });
+})();

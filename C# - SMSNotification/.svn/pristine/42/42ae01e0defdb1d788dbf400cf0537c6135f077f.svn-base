@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "HPC Monitoring Sheet";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section css{
+    @Styles.Render("~/HPCMonitoringSheet-CSS")
+}
+<div class="panel panel-inverse" id="main-panel">
+    <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+        <h4 class="panel-title"><span class="fa fa-user"></span>  @ViewBag.Title</h4>
+    </div>
+    <div class="panel-body">
+        <form data-parsley-validate id="frmFilterHPC">
+            <div class="row ">
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="TransactionDate">Transaction Date<span class="text-danger"></span></label>
+                        </div>
+                        <input type="text" id="FilterTransactionDate" name="FilterTransactionDate" class="form-control input" data-parsley-maxlength="50" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group input-group-sm m-b-5">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" style="width:112px;" for="FilterInputDrum">InputDrum<span class="text-danger"></span></label>
+                        </div>
+                        <select class="form-control input form-control-sm custom-select" multiple="multiple" id="FilterMachineID" name="FilterMachineID"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-6">
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="row">
+                                <div class="col-sm-6 m-b-5">
+                                    <button type="button" id="btnFilterHPC" class="btn btn-sm btn-primary btn-block "><span class="fa fa-file-excel"></span><span class="btnLabel"> Export</span></button>
+                                </div>
+                                <div class="col-sm-6 m-b-5">
+                                    <button type="button" id="btnCancelDataHPC" class="btn btn-sm btn-warning btn-block "><span class="fa fa-times-circle"></span><span class="btnLabel"> Clear</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts{
+    @Scripts.Render("~/HPCMonitoringSheet-Js")
+}
